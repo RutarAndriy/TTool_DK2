@@ -8,6 +8,10 @@ import javax.imageio.*;
 import java.awt.image.*;
 
 import static java.io.File.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Arrays;
 import static javax.swing.JOptionPane.*;
 
 // ............................................................................
@@ -49,36 +53,66 @@ try {
 data = Files.readAllBytes(inputFile.toPath());
 
 // Створення папки для запису результатів розпакування
-outputFile = new File(inputFile.getAbsolutePath().replace(".fnt", separator));
+outputFile = new File(inputFile.getAbsolutePath().replace(".bf4", separator));
 outputFile.mkdir();
 
+// Ініціалізація буферу для зчитування даних
+ByteBuffer buffer = ByteBuffer.wrap(data);
+buffer.order(ByteOrder.LITTLE_ENDIAN);
+
+// Вихідний буфер для запису заголовку шрифта у файл
+ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+// Отримання магічного числа
+byte[] magic = new byte[4];
+buffer.get(magic);
+baos.write(magic);
+
+// Мінімальна ширина символу
+byte minWidth  = buffer.get();
+baos.write(minWidth);
+
+// Максимальна висота символу
+byte maxheight = buffer.get();
+baos.write(maxheight);
+
 // Кількість символів у шрифті
-int charsCount = 255;
+short symbolsCount = buffer.getShort();
+
+// Отримання зміщень блоків даних
+int position;
+var indexes = new ArrayList<Integer>();
+for (int z = 0; z < symbolsCount; z++)
+    { indexes.add(buffer.getInt()); }
 
 // ............................................................................
 // Обробка усіх символів у циклі
 
-for (int z = 0; z < charsCount; z++) {
-    
-    // Ініціалізація нового зображення
-    image = new BufferedImage(w, h, imageType);
-    
-    // Зчитування даних шрифта
-    for (int row = 0; row < h; row++) {
-    for (int col = 0; col < w; col++) {
-        int index = (z * w * h) + row * w + col;
-        color = data[index] == 0 ? 0x0 : 0x00FF00;
-        image.setRGB(col, row, color);
-    }
-    }
+Symbol symbol;
+for (int q = 0; q < indexes.size()-1; q++) {
+
+    // Отримання даних символа
+    int from = indexes.get(q);
+    int to   = indexes.get(q+1);
+    byte[] charData = new byte[to - from];
+    buffer.get(charData);
+
+    // Ініціалізація символа
+    symbol = new Symbol(q, charData);
     
     // Запис результату в файл
-    String imageName = String.format("%03d_%02X", z + 1, z + 1);
+    String fileName = String.format("%03d", q + 1);
     File output = new File(outputFile.getAbsolutePath() + separator +
-                                                         imageName + ".bmp");
-    ImageIO.write(image, "bmp", output);
-    
-}
+                                                          fileName + ".bin");
+    try (var fos = new FileOutputStream(output))
+        { fos.write(symbol.getData()); } }
+
+// Файл для запису заголовку шрифта
+var header = new File(outputFile.getAbsolutePath() + separator + "header.bin");
+
+// Запис даних у файл
+try (var fos = new FileOutputStream(header))
+    { fos.write(baos.toByteArray()); }
 
 showMessageDialog(window, "Шрифт успішно розпаковано!");
 

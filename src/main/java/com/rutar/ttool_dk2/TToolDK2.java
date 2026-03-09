@@ -64,9 +64,9 @@ initAppIcons();
 fileOpen     = Utils.getFileChooser(FILES_ONLY, Map.of
                                    ("txt", "DK2 файли локалізації"));
 fntCompile   = Utils.getFileChooser(DIRECTORIES_ONLY,
-                                    "fnt", "DK2 файли шрифтів");
+                                    "bf4", "DK2 файли шрифтів");
 fntDecompile = Utils.getFileChooser(FILES_ONLY,
-                                    "fnt", "DK2 файли шрифтів");
+                                    "bf4", "DK2 файли шрифтів");
 rawPack      = Utils.getFileChooser(FILES_ONLY,
                                     "bmp", "DK2 розпаковані файли");
 rawUnpack    = Utils.getFileChooser(FILES_ONLY,
@@ -760,7 +760,7 @@ private boolean isMenuSelected (JMenuItem item, boolean flip) {
 
     private void onTableClick(MouseEvent evt) {                              
         IO.println("Clicked");
-    }//GEN-LAST:event_onTableClick                      
+    }                                                   
 
 // ============================================================================
 /// Список усіх об'явлених змінних
