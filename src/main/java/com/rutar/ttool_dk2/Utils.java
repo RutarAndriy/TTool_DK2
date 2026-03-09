@@ -266,8 +266,8 @@ public static JFileChooser getFileChooser (int selectionMode,
     
     JFileChooser chooser = new JFileChooser();
     chooser.setFileSelectionMode(selectionMode);
-    // chooser.removeChoosableFileFilter(chooser
-    //        .getChoosableFileFilters()[0]);
+    chooser.removeChoosableFileFilter(chooser
+           .getChoosableFileFilters()[0]);
     chooser.setCurrentDirectory(HOME_DIR);
     
     filters.forEach((ext, desc) ->
@@ -317,9 +317,9 @@ public static String replaceUnusedChars (String value) {
 
 public static void printAsHex (byte[] array)
     { for (int q = 0; q < array.length; q++)
-          { IO.print(" " + String.format("%02X", array[q]));
-            if ((q+1) % 8  == 0) { IO.print(" ");  }
-            if ((q+1) % 16 == 0) { IO.println(""); } } IO.println(); }
+          { IO.print("%02X ".formatted(array[q]));
+            if ((q+1) % 8  == 0) { IO.print(" "); }
+            if ((q+1) % 16 == 0) { IO.println();  } } IO.println(); }
 
 // Кінець класу Utils =========================================================
 
