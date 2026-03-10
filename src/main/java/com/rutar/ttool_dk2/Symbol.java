@@ -13,18 +13,21 @@ public class Symbol {
 
 private char symbol;                           // символьне представлення даних
 private short unknown_01;                              // невідомий параметр №1
-private int dataSize;                   // розмір даних для рендерингу в байтах
-private int unknown_02;                                // невідомий параметр №2
-private int unknown_03;                                // невідомий параметр №3
+private int dataSize;      // розмір зашифрованих даних для рендерингу в байтах
+private int totalSize;    // розмір розшифрованих даних для рендерингу в байтах
+private byte dataType;                                             // тип даних
+private byte unknown_02;                               // невідомий параметр №2
+private byte unknown_03;                               // невідомий параметр №3
+private byte unknown_04;                               // невідомий параметр №4
 private short renderW;                         // ширина символу при рендерингу
 private short renderH;                         // висота символу при рендерингу
-private byte deltaX;                             // зсув символу по горизонталі
-private byte deltaY;                               // зсув символу по вертикалі
+private byte offsetX;                            // зсув символу по горизонталі
+private byte offsetY;                              // зсув символу по вертикалі
 private short fullWidth;              // ширина символу із врахуванням відступу
 
 private final int id;                                  // ідентифікатор символу
 private final byte[] data;                   // дані у вигляді байтового масиву
-private final int descSize = 2+2+4+4+4+2+2+1+1+2;   // розмір загаловку символу
+private final int descSize = 2+2+4+4+1+1+1+1+2+2+1+1+2;     // розмір заголовку
 
 // ============================================================================
 
@@ -46,14 +49,16 @@ private void parseData() {
     
     unknown_01 = buffer.getShort();
     dataSize   = buffer.getInt();
-    unknown_02 = buffer.getInt();
-    unknown_03 = buffer.getInt();
-    
-    renderW   = buffer.getShort();
-    renderH   = buffer.getShort();
-    deltaX    = buffer.get();
-    deltaY    = buffer.get();
-    fullWidth = buffer.getShort();
+    totalSize  = buffer.getInt();
+    dataType   = buffer.get();
+    unknown_02 = buffer.get();
+    unknown_03 = buffer.get();
+    unknown_04 = buffer.get();
+    renderW    = buffer.getShort();
+    renderH    = buffer.getShort();
+    offsetX    = buffer.get();
+    offsetY    = buffer.get();
+    fullWidth  = buffer.getShort();
     
 }
 
@@ -62,11 +67,14 @@ private void parseData() {
 @Override
 public String toString() {
     
-    String msg = "Id=%3d, '%s', DataSize=%3d, RenderW=%3d, RenderH=%3d, " +
-                 "DeltaX=%2d, DeltaY=%2d, FullW=%3d";
+    String symb = String.valueOf(symbol);
+    if (symbol < 32 || symbol == 173) { symb = " "; }
     
-    return String.format(msg, id+1, symbol, dataSize, renderW, renderH, 
-                                    deltaX, deltaY, fullWidth);
+    String msg = "Id=%3d, '%s', DataSize=%3d, TotalSize=%3d, Type=%X, "
+               + "RenderW=%3d, RenderH=%3d, DeltaX=%2d, DeltaY=%2d, FullW=%3d";
+    
+    return String.format(msg, id+1, symb, dataSize, totalSize, dataType,
+                              renderW, renderH, offsetX, offsetY, fullWidth);
 
 }
 
