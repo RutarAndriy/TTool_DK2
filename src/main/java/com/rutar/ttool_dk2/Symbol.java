@@ -11,7 +11,7 @@ import java.nio.charset.*;
 
 public class Symbol {
 
-private String symbol;                         // рядкове представлення символу
+private char symbol;                           // символьне представлення даних
 private short unknown_01;                              // невідомий параметр №1
 private int dataSize;                   // розмір даних для рендерингу в байтах
 private int unknown_02;                                // невідомий параметр №2
@@ -42,7 +42,8 @@ private void parseData() {
     byte[] charByte = new byte[2];
     buffer.get(charByte);
     
-    symbol     = new String(charByte, Charset.forName("cp1251"));
+    symbol = new String(charByte, Charset.forName("cp1251")).toCharArray()[0];
+    
     unknown_01 = buffer.getShort();
     dataSize   = buffer.getInt();
     unknown_02 = buffer.getInt();
@@ -77,6 +78,10 @@ public byte[] getData() { return data; }
 
 public byte[] getRenderData()
     { return Arrays.copyOfRange(data, descSize, data.length); }
+
+// ============================================================================
+
+public char getChar() { return symbol; }
 
 // Кінець класу Symbol ========================================================
 

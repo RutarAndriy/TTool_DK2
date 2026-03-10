@@ -167,11 +167,8 @@ public static String fromCharToString (char c) {
         result.equals(":")  || result.equals("*")  ||
         result.equals("?")  || result.equals("\"") ||
         result.equals("<")  || result.equals(">")  ||
-        result.equals("|")  || result.equals("_")) {
-        
-        result = Integer.toString(Utils.fromCP1251CharToCode(c));
-    
-    }
+        result.equals("|")  || result.equals("_")  || c < 32)
+      { result = Integer.toString(Utils.fromCP1251CharToCode(c)); }
     
     return result;
 }

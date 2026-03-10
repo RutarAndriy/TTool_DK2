@@ -2,17 +2,16 @@ package com.rutar.ttool_dk2;
 
 import java.io.*;
 import java.awt.*;
+import java.nio.*;
+import java.util.*;
 import javax.swing.*;
 import java.nio.file.*;
 import javax.imageio.*;
 import java.awt.image.*;
 
 import static java.io.File.*;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.Arrays;
 import static javax.swing.JOptionPane.*;
+import static com.rutar.ttool_dk2.TToolDK2.*;
 
 // ............................................................................
 /// Обробка ігрових шрифтів
@@ -21,9 +20,6 @@ import static javax.swing.JOptionPane.*;
 
 public class FontProcessor {
 
-private int w;                                             // ширина зображення
-private int h;                                             // висота зображення
-private int color;                                 // колір конкретного пікселя
 private byte[] data;                                             // дані шрифта
 private File inputFile;                                   // вхідний файл/папка
 private File outputFile;                                 // вихідний файл/папка
@@ -80,7 +76,6 @@ baos.write(maxheight);
 short symbolsCount = buffer.getShort();
 
 // Отримання зміщень блоків даних
-int position;
 var indexes = new ArrayList<Integer>();
 for (int z = 0; z < symbolsCount; z++)
     { indexes.add(buffer.getInt()); }
@@ -89,19 +84,22 @@ for (int z = 0; z < symbolsCount; z++)
 // Обробка усіх символів у циклі
 
 Symbol symbol;
-for (int q = 0; q < indexes.size()-1; q++) {
+for (int q = 0; q < indexes.size(); q++) {
 
     // Отримання даних символа
-    int from = indexes.get(q);
-    int to   = indexes.get(q+1);
+    int to, from = indexes.get(q);
+    if (q < indexes.size() - 1) { to = indexes.get(q+1);  }
+    else                        { to = buffer.capacity(); }
     byte[] charData = new byte[to - from];
     buffer.get(charData);
 
     // Ініціалізація символа
     symbol = new Symbol(q, charData);
+    if (debug) { IO.println(symbol.toString()); }
     
     // Запис результату в файл
-    String fileName = String.format("%03d", q + 1);
+    String fileName = String.format("%03d_%s", q + 1, Utils
+                            .fromCharToString(symbol.getChar()));
     File output = new File(outputFile.getAbsolutePath() + separator +
                                                           fileName + ".bin");
     try (var fos = new FileOutputStream(output))
