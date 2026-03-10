@@ -2,6 +2,7 @@ package com.rutar.ttool_dk2;
 
 import java.io.*;
 import java.awt.*;
+import java.nio.ByteBuffer;
 import java.util.*;
 import javax.swing.*;
 import java.nio.charset.*;
@@ -307,6 +308,14 @@ public static String replaceUnusedChars (String value) {
                 .replace('Ґ', 'Г')
                 .replace('ґ', 'г');
 }
+
+// ============================================================================
+/// Отримання даних із ByteBuffer
+/// @param buffer буфер із даними
+/// @return усі записані в буфер дані
+
+public static byte[] getData (ByteBuffer buffer)
+    { return Arrays.copyOf(buffer.array(), buffer.position()); }
 
 // ============================================================================
 /// Виведення байтового масиву в консоль у вигляді hex-значень
