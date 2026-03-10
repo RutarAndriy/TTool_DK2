@@ -6,12 +6,13 @@ import java.nio.*;
 import java.util.*;
 import javax.swing.*;
 import java.nio.file.*;
-import javax.imageio.*;
 import java.awt.image.*;
 
 import static java.io.File.*;
+import static java.nio.ByteOrder.*;
 import static javax.swing.JOptionPane.*;
 import static com.rutar.ttool_dk2.TToolDK2.*;
+
 
 // ............................................................................
 /// Обробка ігрових шрифтів
@@ -23,6 +24,7 @@ public class FontProcessor {
 private byte[] data;                                             // дані шрифта
 private File inputFile;                                   // вхідний файл/папка
 private File outputFile;                                 // вихідний файл/папка
+private ByteBuffer buffer;                                       // буфер даних
 private BufferedImage image;                           // зображення для запису
 
 private final JFrame window;                          // головне вікно програми
@@ -53,8 +55,7 @@ outputFile = new File(inputFile.getAbsolutePath().replace(".bf4", separator));
 outputFile.mkdir();
 
 // Ініціалізація буферу для зчитування даних
-ByteBuffer buffer = ByteBuffer.wrap(data);
-buffer.order(ByteOrder.LITTLE_ENDIAN);
+buffer = ByteBuffer.wrap(data).order(LITTLE_ENDIAN);
 
 // Вихідний буфер для запису заголовку шрифта у файл
 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -130,11 +131,16 @@ catch (HeadlessException | IOException e)
 
 public void compile (File dir) {
 
-// Ініціалізація вхідного файлу
+int index = 0;
+
+// Ініціалізація вхідної папки
 inputFile = dir;
 
+// Ініціалізація файлу що містить заголовок шрифта
+File header = new File(inputFile.getAbsolutePath() + separator + "header.bin");
+
 // Ініціалізація вихідного файлу
-outputFile = new File(inputFile.getAbsolutePath() + ".fnt");
+outputFile = new File(inputFile.getAbsolutePath() + ".bf4");
 
 // ............................................................................
 // Збирання окремих символів у єдиний файл шрифту
@@ -145,37 +151,47 @@ try (FileOutputStream fos = new FileOutputStream(outputFile);
 // Масив зображень окремих символів
 File[] allFiles = inputFile.listFiles();
 
+// Запис інформації про заголовок шрифту
+byte[] headerBytes = Files.readAllBytes(header.toPath());
+index += headerBytes.length;
+bos.write(headerBytes);
+
+// Запис інформації про кількость символів у шрифті
+buffer = ByteBuffer.allocate(4).order(LITTLE_ENDIAN);
+short symbolCount = (short) (allFiles.length - 1);
+buffer.putShort(symbolCount);
+data = Utils.getData(buffer);
+bos.write(data);
+
+// Задання початкового значення індексу
+index += 4 + 2 + (symbolCount - 1) * 4;
+
+// Ініціалізація вихідного байтового потоку
+var baos = new ByteArrayOutputStream();
+
 // Обробка символів у циклі
-for (int z = 0; z < allFiles.length; z++) {
+for (int z = 0; z < allFiles.length - 1; z++) {
 
     // Отримання назви файлу для обробки
-    String imageName = String.format("%03d_%02X", z + 1, z + 1);
+    String imageName = String.format("%03d", z + 1);
     for (File f : allFiles)
-        { if (f.getName().startsWith(imageName)) { imageName = f.getName();
+        { if (f.getName().startsWith(imageName)) { inputFile = f;
                                                    break; } }
     
-    // Зчитування даних зображення
-    image = ImageIO.read(new File(inputFile.getAbsolutePath() + separator
-                                                              + imageName));
+    // Запис інформації про поточний індекс
+    buffer.clear();
+    buffer.putInt(index);
+    bos.write(Utils.getData(buffer));
     
-    // Перевірка формату прочитаного зображення
-    if (image.getType() != imageType)
-        { String msg = "Файл %s має неправильний формат!%n"
-                     + "Повинен бути 24-бітний BMP";
-          showMessageDialog(window, msg.formatted(imageName), "Помилка", 0);
-          return; }
-    
-    // Отримання масиву пікселів зображення
-    byte[] imageData = ((DataBufferByte)(image.getRaster().getDataBuffer()))
-                                                          .getData();
-    byte[] writable = new byte[imageData.length / 3];
-    
-    // Обробка та запис даних
-    for (int pixel = 0; pixel < writable.length; pixel++)
-        { writable[pixel] = (byte) (imageData[pixel * 3] == 0 ? 0x0 : 0x1); }
-    bos.write(writable);
+    // Зчитування даних символа
+    byte[] symbolBytes = Files.readAllBytes(inputFile.toPath());
+    index += symbolBytes.length;
+    baos.write(symbolBytes);
 
 }
+
+// Запис даних у файл
+bos.write(baos.toByteArray());
 
 showMessageDialog(window, "Шрифт успішно запаковано!");
 

@@ -89,7 +89,6 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="&#x417;&#x430;&#x43f;&#x430;&#x43a;&#x443;&#x432;&#x430;&#x442;&#x438; &#x448;&#x440;&#x438;&#x444;&#x442;"/>
                 <Property name="actionCommand" type="java.lang.String" value="compileFont"/>
-                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="onMenuClick"/>

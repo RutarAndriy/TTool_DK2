@@ -627,7 +627,6 @@ private void initAppIcons() {
         mni_fntCompile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
         mni_fntCompile.setText("Запакувати шрифт");
         mni_fntCompile.setActionCommand("compileFont");
-        mni_fntCompile.setEnabled(false);
         mni_fntCompile.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 onMenuClick(evt);
