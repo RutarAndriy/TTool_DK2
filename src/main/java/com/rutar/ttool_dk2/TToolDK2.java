@@ -62,7 +62,8 @@ initComponents();
 initAppIcons();
 
 fileOpen     = Utils.getFileChooser(FILES_ONLY, Map.of
-                                   ("txt", "DK2 файли локалізації"));
+                                   ("txt", "DK2 файли локалізації",
+                                    "dat", "DK2 таблиця символів"));
 fntCompile   = Utils.getFileChooser(DIRECTORIES_ONLY,
                                     "bf4", "DK2 файли шрифтів");
 fntDecompile = Utils.getFileChooser(FILES_ONLY,
@@ -139,7 +140,8 @@ inputFile = fileOpen.getSelectedFile();
 String[] split = fileOpen.getSelectedFile().getName().split("\\.");
 fileExt = split[split.length - 1].toLowerCase();
 
-switch (fileExt) { case "txt" -> openTextFile(); }
+switch (fileExt) { case "txt" -> openTextFile();
+                   case "dat" -> openDatFile(); }
 
 updateAppTitle();
 
@@ -155,6 +157,25 @@ dataWasChanged = false;
 
 // Читання ігрових файлів
 try { new TextProcessor().read(inputFile, tbl_main);
+      finalizeNewTable(); }
+
+// ............................................................................
+
+catch (IOException e)
+    { showMessageDialog(this, "При обробленні файлу відбулася критична " +
+                              "помилка", "Помилка", ERROR_MESSAGE); }
+}
+
+// ============================================================================
+/// Відкривання *.dat файлів
+
+private void openDatFile() {
+
+prepareNewTable();
+dataWasChanged = false;
+
+// Читання ігрових файлів
+try { new DatProcessor().read(inputFile, tbl_main);
       finalizeNewTable(); }
 
 // ............................................................................
@@ -347,15 +368,18 @@ tableModel = new DefaultTableModel() {
     @Override
     public boolean isCellEditable (int row, int column) {
         switch (fileExt) {
-            default -> { return column >= 2; } } } };
+            case "dat" -> { return column >= 1; }
+            default    -> { return column >= 2; } } } };
 
 tbl_main.setModel(tableModel);
 
-tableModel.addColumn("№");
-tableModel.addColumn("Ключ");
-tableModel.addColumn("Значення");
-
-}
+switch (fileExt) {
+    case "txt" -> { tableModel.addColumn("№");
+                    tableModel.addColumn("Ключ");
+                    tableModel.addColumn("Значення"); }
+    case "dat" -> { tableModel.addColumn("№");
+                    tableModel.addColumn("Символ");
+                    tableModel.addColumn("Пробіл після символу"); } } }
 
 // ============================================================================
 /// Завершальна ініціалізація нової таблиці
@@ -365,8 +389,9 @@ private void finalizeNewTable() {
 CellRender centerRender = new CellRender();
 centerRender.setHorizontalAlignment(SwingConstants.CENTER);
 
-if (fileExt.equals("txt"))
-    { setColumnParams(centerRender, 45, 175, 175); }
+switch (fileExt)
+    { case "txt" -> { setColumnParams(centerRender, 45, 175, 175); }
+      case "dat" -> { setColumnParams(centerRender, 50, 250, 250); } }
 
 updateTableInfo();
 
@@ -386,12 +411,12 @@ private void setColumnParams (CellRender render, int ... columnSizes) {
 
 TableColumn tColumn;
 boolean newRender, isResizable;
-boolean isTxt = fileExt.equals("txt");
 
 for (int z = 0; z < columnSizes.length; z++) {
 
-    newRender    = isTxt ? z > 1 : z > 0;
-    isResizable  = isTxt ? z > 1 : z > 0;
+    switch (fileExt)
+        { case "dat" -> { newRender = z > 2; isResizable = z > 1; }
+          default    -> { newRender = z > 1; isResizable = z > 1; } }
     
     tColumn = tbl_main.getColumnModel().getColumn(z);
     tColumn.setCellRenderer(!newRender ? render : new CellRender());
@@ -758,7 +783,7 @@ private boolean isMenuSelected (JMenuItem item, boolean flip) {
 /// Прослуховування натискань у таблиці
 
     private void onTableClick(MouseEvent evt) {                              
-        IO.println("Clicked");
+        // IO.println("Clicked");
     }                                                   
 
 // ============================================================================

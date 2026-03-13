@@ -49,7 +49,7 @@ return component;
 
 private void setNormalColor (Component component, int c, int r) {
     
-    if (c != 2)
+    if (c < 1)
          { component.setForeground(Color.GRAY);   }
     else { component.setForeground(defaultColor); }
     
