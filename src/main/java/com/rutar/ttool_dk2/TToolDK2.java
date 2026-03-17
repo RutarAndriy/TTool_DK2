@@ -62,7 +62,7 @@ initComponents();
 initAppIcons();
 
 fileOpen     = Utils.getFileChooser(FILES_ONLY, Map.of
-                                   ("txt", "DK2 файли локалізації",
+                                   ("str", "DK2 файли локалізації",
                                     "dat", "DK2 таблиця символів"));
 fntCompile   = Utils.getFileChooser(DIRECTORIES_ONLY,
                                     "bf4", "DK2 файли шрифтів");
@@ -86,7 +86,7 @@ strikeFont = mni_about.getFont().deriveFont(attr);
 /// @param args масив переданих параметрів
 
 public static void main (String args[]) {
-    
+
     if (args.length > 0 &&
         args[0].equals("--debug")) { debug = true; }
     
@@ -140,7 +140,7 @@ inputFile = fileOpen.getSelectedFile();
 String[] split = fileOpen.getSelectedFile().getName().split("\\.");
 fileExt = split[split.length - 1].toLowerCase();
 
-switch (fileExt) { case "txt" -> openTextFile();
+switch (fileExt) { case "str" -> openStrFile();
                    case "dat" -> openDatFile(); }
 
 updateAppTitle();
@@ -148,15 +148,15 @@ updateAppTitle();
 }
 
 // ============================================================================
-/// Відкривання *.txt файлів
+/// Відкривання *.str файлів
 
-private void openTextFile() {
+private void openStrFile() {
 
 prepareNewTable();
 dataWasChanged = false;
 
 // Читання ігрових файлів
-try { new TextProcessor().read(inputFile, tbl_main);
+try { new TextProcessor().readStr(inputFile, tbl_main);
       finalizeNewTable(); }
 
 // ............................................................................
@@ -368,15 +368,14 @@ tableModel = new DefaultTableModel() {
     @Override
     public boolean isCellEditable (int row, int column) {
         switch (fileExt) {
-            case "dat" -> { return column >= 1; }
+            case "str" -> { return column >= 1; }
             default    -> { return column >= 2; } } } };
 
 tbl_main.setModel(tableModel);
 
 switch (fileExt) {
-    case "txt" -> { tableModel.addColumn("№");
-                    tableModel.addColumn("Ключ");
-                    tableModel.addColumn("Значення"); }
+    case "str" -> { tableModel.addColumn("№");
+                    tableModel.addColumn("Текст для перекладу"); }
     case "dat" -> { tableModel.addColumn("№");
                     tableModel.addColumn("Символ");
                     tableModel.addColumn("Пробіл після символу"); } } }
@@ -390,7 +389,7 @@ CellRender centerRender = new CellRender();
 centerRender.setHorizontalAlignment(SwingConstants.CENTER);
 
 switch (fileExt)
-    { case "txt" -> { setColumnParams(centerRender, 45, 175, 175); }
+    { case "str" -> { setColumnParams(centerRender, 45, 175); }
       case "dat" -> { setColumnParams(centerRender, 50, 250, 250); } }
 
 updateTableInfo();
@@ -415,7 +414,7 @@ boolean newRender, isResizable;
 for (int z = 0; z < columnSizes.length; z++) {
 
     switch (fileExt)
-        { case "dat" -> { newRender = z > 2; isResizable = z > 1; }
+        { case "str" -> { newRender = z > 0; isResizable = z > 1; }
           default    -> { newRender = z > 1; isResizable = z > 1; } }
     
     tColumn = tbl_main.getColumnModel().getColumn(z);

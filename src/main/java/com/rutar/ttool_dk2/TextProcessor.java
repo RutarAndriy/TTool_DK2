@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.nio.file.*;
 import javax.swing.table.*;
 
+import static java.io.File.*;
 import static java.nio.ByteOrder.*;
 import static com.rutar.ttool_dk2.TToolDK2.*;
 
@@ -17,50 +18,89 @@ import static com.rutar.ttool_dk2.TToolDK2.*;
 
 public class TextProcessor {
 
+private String tmp;                                         // допоміжна змінна
 private byte[] allBytes;                                   // усі зчитані байти
 private ByteBuffer buffer;                    // буфер для читання/запису даних
+private char[] symbolsTable;                                  // масив символів
+
+// ............................................................................
+
+private final int HEADER_SIZE = 12;                         // розмір заголовку
+private final StringBuilder builder = new StringBuilder();   // збирач символів
+
+private final char[] unprintableSymbols =   // заміни для недрукованих символів
+    { '➀', '➁', '➂', '➃', '➄', '➅', '➆', '➇', '➈', '➉',
+      '➊', '➋', '➌', '➍', '➎', '➏', '➐', '➑', '➒', '➓',
+      'Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'Ⅵ', 'Ⅶ', 'Ⅷ', 'Ⅸ', 'Ⅹ', 'Ⅺ', 'Ⅻ' };
 
 // ============================================================================
-/// Читання зашифрованих ігрових файлів
+/// Читання зашифрованих ігрових текстів
 /// @param inputFile вхідний файл
 /// @param table головна таблиця із даними
 /// @throws IOException якщо відбулася помилка обробки файлу
 
-public void read (File inputFile, JTable table) throws IOException {
+public void readStr (File inputFile, JTable table) throws IOException {
 
 // Доступ до моделі даних головної таблиці
 DefaultTableModel tModel = (DefaultTableModel) table.getModel();
 
-// Зчитування всіх байт
+// Ініціалізація та перевірка наявності файлу "MBToUni.dat"
+File datFile = new File(inputFile.getParent() + separator + "MBToUni.dat");
+if (!datFile.exists()) { throw new IOException("MBToUni.dat"); }
+
+// Ініціалізація таблиці перетворення символів
+initSymbolTable(datFile);
+
+// Зчитування всіх байт вхідного файлу
 allBytes = Files.readAllBytes(inputFile.toPath());
 
 // Ініціалізація буфера
 buffer = ByteBuffer.wrap(allBytes);
 buffer.order(LITTLE_ENDIAN);
 
-// ...
+// Читання магічного числа
+byte[] magic = new byte[4];
+buffer.get(magic);
+buffer.getInt();
 
-int id = 0;                                                    // ідентифікатор
-String tmp;                                                 // допоміжна змінна
+int stringsCount = buffer.getInt();                         // кількість рядків
+int[] offsets = new int[stringsCount];        // масив зміщень текстових рядків
 ArrayList<String> row = new ArrayList<>();         // масив даних рядка таблиці
 
-while (id < 10)
-    { tmp = String.valueOf(buffer.getInt());
+// Зчитування всіх зміщень текстових рядків
+for (int z = 0; z < offsets.length; z++)
+    { offsets[z] = buffer.getInt();
+      if (debug) { IO.println("offset №%04d = 0x%X"
+                     .formatted(z+1, offsets[z])); } }
+
+// Зчитування всіх текстових рядків
+for (int q = 0; q < offsets.length; q++)
+    { // Задавання нової позиції для буфера
+      int position = offsets[q] + HEADER_SIZE;
+      buffer.position(position);
+      // Зчитування інформації про рядок
+      byte  type    = buffer.get();
+      short size    = buffer.getShort();
+      byte  unknown = buffer.get();
+      // Зчитування текстового блоку
+      byte[] text = new byte[size];
+      buffer.get(text);
+      // Розшифровування текстового блоку
+      tmp = decryptString(text);
+      // Додавання даних у таблицю
       row.clear();
-      row.add(String.valueOf(++id));
-      row.add("S = %d".formatted(tmp.length()));
+      row.add(String.valueOf(q + 1));
       row.add(tmp);
       tModel.addRow(row.toArray(String[]::new)); } }
 
 // ============================================================================
-/// Запис зашифрованих ігрових файлів
+/// Запис зашифрованих ігрових текстів
 /// @param outputFile вихідний файл
 /// @param table головна таблиця із даними
 /// @throws IOException якщо відбулася помилка обробки файлу
 
 public void write (File outputFile, JTable table) throws IOException {
 
-String tmp; // допоміжна змінна
 ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 for (int z = 0; z < table.getRowCount(); z++)
@@ -74,6 +114,106 @@ for (int z = 0; z < table.getRowCount(); z++)
 // Запис результату в файл
 try (FileOutputStream fos = new FileOutputStream(outputFile))
     { fos.write(allBytes); } }
+
+// ============================================================================
+/// Ініціалізація таблиці кодування символів
+/// @param datFile вхідний "MBToUni.dat" файл
+/// @throws IOException якщо відбулася помилка обробки файлу
+
+public void initSymbolTable (File datFile) throws IOException {
+
+// Зчитування всіх байт
+allBytes = Files.readAllBytes(datFile.toPath());
+
+// Ініціалізація буфера
+buffer = ByteBuffer.wrap(allBytes);
+buffer.order(LITTLE_ENDIAN);
+
+// Читання магічного числа
+byte[] magic = new byte[4];
+buffer.get(magic);
+buffer.getShort();
+
+byte[] symbolBytes = new byte[2];                    // байти зчитаного символу
+short symbolsCount = buffer.getShort();                   // кількість символів
+symbolsTable = new char[symbolsCount];         // ініціалізація масиву символів
+
+// Зчитування таблиці символів
+for (int z = 0; z < symbolsCount; z++)
+    { buffer.get(symbolBytes);
+      symbolsTable[z] = getCharByBytes(symbolBytes);
+      if (debug) { IO.println("%03d <> %s"
+                     .formatted(z, symbolsTable[z])); } } }
+
+// ============================================================================
+/// Перетворення масиву байт на символ
+/// @param bytes масив байт, який потрібно перетворити
+/// @return символ
+
+private char getCharByBytes (byte[] bytes) {
+
+// Перетворення байту у беззнакове ціле число
+int n = Byte.toUnsignedInt(bytes[0]);
+
+// Якщо символ є однобайтним - використовуємо кодування cp1251
+if (bytes[1] == 0) {
+    // Заміна недрукованих спецсимволів
+    if      (n < 32)   { return unprintableSymbols[n]; }
+    // Заміна символу м'якого переносу
+    else if (n == 173) { return '□'; }
+    // Заміна символу нерозривного пробілу
+    else if (n == 160) { return '■'; }
+    // Заміна особливого керуючого символу
+    else if (n == 152) { return '☑'; }
+    // Заміна символу видалення
+    else if (n == 127) { return '☒'; }
+    // Обробка звичайних символів
+    else { try { tmp = new String(new byte[] { bytes[0] }, "cp1251");
+                 return tmp.toCharArray()[0]; }
+           catch (UnsupportedEncodingException e) { return '※'; } } }
+
+// Якщо символ є двохбайтним - заміняємо його
+else { switch (n) { case 19 -> { return '♙'; }
+                    case 24 -> { return '♘'; }
+                    case 25 -> { return '♗'; }
+                    case 28 -> { return '♖'; }
+                    case 29 -> { return '♕'; }
+                    case 38 -> { return '♔'; }
+                    default -> { return '※'; } } } }
+
+// ============================================================================
+/// Перетворення символу на масив байт
+/// @param symbol символ, який потрібно перетворити
+/// @return масив байт
+
+private byte[] getBytesByChar (char symbol) {
+    return null;
+}
+
+// ============================================================================
+/// Розшифрування текстового блоку
+
+private String decryptString (byte[] data) {
+    
+    // Якщо розмір нульовий - повертаємо пустий рядок
+    if (data.length == 0) { return ""; }
+    
+    // Очищення попередніх даних
+    builder.setLength(0);
+    
+    // Збирання набору символів у єдине ціле
+    for (byte b : data)
+        { int code = Byte.toUnsignedInt(b) - 1;
+          builder.append(symbolsTable[code]); }
+    
+    return builder.toString(); }
+
+// ============================================================================
+/// Шифрування текстового блоку
+
+private String encryptString (char symbol) {
+    return null;
+}
 
 // Кінець класу TextProcessor =================================================
 
