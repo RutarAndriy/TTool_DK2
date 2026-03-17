@@ -159,9 +159,13 @@ try { new TextProcessor().readStr(inputFile, tbl_main);
 
 // ............................................................................
 
-catch (IOException e)
-    { showMessageDialog(this, "При обробленні файлу відбулася критична " +
-                              "помилка", "Помилка", ERROR_MESSAGE); }
+catch (Exception e)
+    { String msg;
+      if (e.getMessage().contains("MBToUni.dat"))
+           { msg = "Відсутній файл MBToUni.dat, подальша обробка неможлива"; }
+      else { msg = "При обробленні файлу відбулася критична помилка"; }
+      tbl_main.setModel(new DefaultTableModel());
+      showMessageDialog(this, msg, "Помилка", ERROR_MESSAGE); }
 }
 
 // ============================================================================
@@ -197,7 +201,7 @@ showMessageDialog(this, "Файл " + outputFile.getName() + " успішно з
 
 // ............................................................................
 
-catch (HeadlessException | IOException _)
+catch (Exception _)
     { showMessageDialog(this, "При збереженні файлу відбулася критична "
                             + "помилка", "Помилка", ERROR_MESSAGE); }
 }
@@ -393,7 +397,7 @@ boolean newRender, isResizable;
 for (int z = 0; z < columnSizes.length; z++) {
 
     switch (fileExt)
-        { case "str" -> { newRender = z > 0; isResizable = z > 1; }
+        { case "str" -> { newRender = z > 0; isResizable = z > 0; }
           default    -> { newRender = z > 1; isResizable = z > 1; } }
     
     tColumn = tbl_main.getColumnModel().getColumn(z);

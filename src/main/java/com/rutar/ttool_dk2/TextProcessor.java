@@ -39,14 +39,14 @@ private final char[] unprintableSymbols =   // заміни для недрук�
 /// @param table головна таблиця із даними
 /// @throws IOException якщо відбулася помилка обробки файлу
 
-public void readStr (File inputFile, JTable table) throws IOException {
+public void readStr (File inputFile, JTable table) throws Exception {
 
 // Доступ до моделі даних головної таблиці
 DefaultTableModel tModel = (DefaultTableModel) table.getModel();
 
 // Ініціалізація та перевірка наявності файлу "MBToUni.dat"
 File datFile = new File(inputFile.getParent() + separator + "MBToUni.dat");
-if (!datFile.exists()) { throw new IOException("MBToUni.dat"); }
+if (!datFile.exists()) { throw new Exception("MBToUni.dat"); }
 
 // Ініціалізація таблиці перетворення символів
 initSymbolTable(datFile);
@@ -99,7 +99,7 @@ for (int q = 0; q < offsets.length; q++)
 /// @param table головна таблиця із даними
 /// @throws IOException якщо відбулася помилка обробки файлу
 
-public void write (File outputFile, JTable table) throws IOException {
+public void write (File outputFile, JTable table) throws Exception {
 
 ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -120,7 +120,7 @@ try (FileOutputStream fos = new FileOutputStream(outputFile))
 /// @param datFile вхідний "MBToUni.dat" файл
 /// @throws IOException якщо відбулася помилка обробки файлу
 
-public void initSymbolTable (File datFile) throws IOException {
+public void initSymbolTable (File datFile) throws Exception {
 
 // Зчитування всіх байт
 allBytes = Files.readAllBytes(datFile.toPath());
