@@ -62,8 +62,7 @@ initComponents();
 initAppIcons();
 
 fileOpen     = Utils.getFileChooser(FILES_ONLY, Map.of
-                                   ("str", "DK2 файли локалізації",
-                                    "dat", "DK2 таблиця символів"));
+                                   ("str", "DK2 файли локалізації"));
 fntCompile   = Utils.getFileChooser(DIRECTORIES_ONLY,
                                     "bf4", "DK2 файли шрифтів");
 fntDecompile = Utils.getFileChooser(FILES_ONLY,
@@ -140,8 +139,7 @@ inputFile = fileOpen.getSelectedFile();
 String[] split = fileOpen.getSelectedFile().getName().split("\\.");
 fileExt = split[split.length - 1].toLowerCase();
 
-switch (fileExt) { case "str" -> openStrFile();
-                   case "dat" -> openDatFile(); }
+switch (fileExt) { case "str" -> openStrFile(); }
 
 updateAppTitle();
 
@@ -157,25 +155,6 @@ dataWasChanged = false;
 
 // Читання ігрових файлів
 try { new TextProcessor().readStr(inputFile, tbl_main);
-      finalizeNewTable(); }
-
-// ............................................................................
-
-catch (IOException e)
-    { showMessageDialog(this, "При обробленні файлу відбулася критична " +
-                              "помилка", "Помилка", ERROR_MESSAGE); }
-}
-
-// ============================================================================
-/// Відкривання *.dat файлів
-
-private void openDatFile() {
-
-prepareNewTable();
-dataWasChanged = false;
-
-// Читання ігрових файлів
-try { new DatProcessor().read(inputFile, tbl_main);
       finalizeNewTable(); }
 
 // ............................................................................
