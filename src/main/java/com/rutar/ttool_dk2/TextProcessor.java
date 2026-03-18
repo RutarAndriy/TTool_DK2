@@ -25,8 +25,11 @@ private char[] symbolsTable;                                  // масив си
 
 // ............................................................................
 
+private final int BLOCK_SIZE = 4;                         // розмір блоку даних
 private final int HEADER_SIZE = 12;                         // розмір заголовку
 private final StringBuilder builder = new StringBuilder();   // збирач символів
+
+// ............................................................................
 
 private final char[] unprintableSymbols =   // заміни для недрукованих символів
     { '➀', '➁', '➂', '➃', '➄', '➅', '➆', '➇', '➈', '➉',
@@ -75,18 +78,14 @@ for (int z = 0; z < offsets.length; z++)
 
 // Зчитування всіх текстових рядків
 for (int q = 0; q < offsets.length; q++)
-    { // Задавання нової позиції для буфера
-      int position = offsets[q] + HEADER_SIZE;
-      buffer.position(position);
-      // Зчитування інформації про рядок
-      byte  type    = buffer.get();
-      short size    = buffer.getShort();
-      byte  unknown = buffer.get();
-      // Зчитування текстового блоку
-      byte[] text = new byte[size];
-      buffer.get(text);
+    { // Визначення початку і кінця даних
+      int from = offsets[q] + HEADER_SIZE;
+      int to   = (q == offsets.length - 1) ? allBytes.length :
+                                             offsets[q+1] + HEADER_SIZE;
+      // Копіювання даних із загального масиву
+      byte[] textData = Arrays.copyOfRange(allBytes, from, to);
       // Розшифровування текстового блоку
-      tmp = decryptString(text);
+      tmp = decryptString(textData);
       // Додавання даних у таблицю
       row.clear();
       row.add(String.valueOf(q + 1));
@@ -142,7 +141,7 @@ symbolsTable = new char[symbolsCount];         // ініціалізація м�
 for (int z = 0; z < symbolsCount; z++)
     { buffer.get(symbolBytes);
       symbolsTable[z] = getCharByBytes(symbolBytes);
-      if (debug) { IO.println("%03d <> %s"
+      if (debug) { IO.println("%03d <> 0x%1$02X <> \"%s\""
                      .formatted(z, symbolsTable[z])); } } }
 
 // ============================================================================
@@ -199,14 +198,56 @@ private String decryptString (byte[] data) {
     if (data.length == 0) { return ""; }
     
     // Очищення попередніх даних
+    buffer = ByteBuffer.wrap(data).order(LITTLE_ENDIAN);
     builder.setLength(0);
     
-    // Збирання набору символів у єдине ціле
-    for (byte b : data)
-        { int code = Byte.toUnsignedInt(b) - 1;
-          builder.append(symbolsTable[code]); }
+    byte type;          // тип даних: 1 - текст, 2 - посилання
+    int position = 0;   // позиція обробки даних
+    byte[] dataPart;    // частина даних
+    short size, link;   // розмір даних та номер посилання
     
-    return builder.toString(); }
+    // Обробка даних у циклі
+    while (position < data.length - 1) {
+
+        // Визначення типу даних
+        type = buffer.get(); position++;
+
+        // Тип даних 1 - текст
+        if (type == 1) {
+            // Визначення розміру даних
+            size = buffer.getShort(); position += 2;
+            buffer.get();             position += 1;
+            // Зчитування текстових даних
+            dataPart = new byte[size];
+            buffer.get(dataPart); position += size;
+            // Посимвольна обробка тексту
+            for (byte b : dataPart)
+                { int code = Byte.toUnsignedInt(b) - 1;
+                  builder.append(symbolsTable[code]); }
+            // Розрахунок правильного розміру блоку
+            int rem = position % BLOCK_SIZE;
+            if (rem != 0) { position += (BLOCK_SIZE - rem); } }
+
+        // Тип даних 2 - посилання
+        else if (type == 2) {
+            // Отримання номеру посилання
+            link = buffer.getShort(); position += 2;
+            buffer.get();             position += 1;
+            // Обробка посилання
+            builder.append('〖');
+            builder.append(String.valueOf(link + 1));
+            builder.append('〗'); }
+
+        // Тип даних 0 - дані закінчилися
+        else { break; }
+
+        // Оновлення позиції буферу
+        buffer.position(position);
+    }
+
+    // Повернення результату
+    return builder.toString();
+}
 
 // ============================================================================
 /// Шифрування текстового блоку
