@@ -154,7 +154,7 @@ prepareNewTable();
 dataWasChanged = false;
 
 // Читання ігрових файлів
-try { new TextProcessor().readStr(inputFile, tbl_main);
+try { new TextProcessor().read(inputFile, tbl_main);
       finalizeNewTable(); }
 
 // ............................................................................
@@ -177,16 +177,16 @@ fileOpen.setSelectedFile(inputFile);
 int result = fileOpen.showSaveDialog(this);
 if (result != JFileChooser.APPROVE_OPTION) { return; }
 
-switch (fileExt) { case "txt" -> saveTextFile(); }
+switch (fileExt) { case "str" -> saveStrFile(); }
 
 updateAppTitle();
 
 }
 
 // ============================================================================
-/// Збереження *.txt файлів
+/// Збереження *.str файлів
 
-private void saveTextFile() {
+private void saveStrFile() {
 
 outputFile = fileOpen.getSelectedFile();
 
