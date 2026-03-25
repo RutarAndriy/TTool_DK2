@@ -5,6 +5,7 @@ import java.awt.*;
 import java.nio.*;
 import java.util.*;
 import javax.swing.*;
+import javax.imageio.*;
 import java.nio.file.*;
 import java.awt.image.*;
 
@@ -12,7 +13,6 @@ import static java.io.File.*;
 import static java.nio.ByteOrder.*;
 import static javax.swing.JOptionPane.*;
 import static com.rutar.ttool_dk2.TToolDK2.*;
-
 
 // ............................................................................
 /// Обробка ігрових шрифтів
@@ -28,7 +28,6 @@ private ByteBuffer buffer;                                       // буфер �
 private BufferedImage image;                           // зображення для запису
 
 private final JFrame window;                          // головне вікно програми
-private final int imageType = BufferedImage.TYPE_3BYTE_BGR;   // тип зображення
 
 // ============================================================================
 /// Конструктор за замовчуванням
@@ -70,8 +69,8 @@ byte minWidth  = buffer.get();
 baos.write(minWidth);
 
 // Максимальна висота символу
-byte maxheight = buffer.get();
-baos.write(maxheight);
+byte maxHeight = buffer.get();
+baos.write(maxHeight);
 
 // Кількість символів у шрифті
 short symbolsCount = buffer.getShort();
@@ -95,16 +94,20 @@ for (int q = 0; q < indexes.size(); q++) {
     buffer.get(charData);
 
     // Ініціалізація символа
-    symbol = new Symbol(q, charData);
+    symbol = new Symbol(q, maxHeight, charData);
     if (debug) { IO.println(symbol.toString()); }
+    image = symbol.getImage();
     
-    // Запис результату в файл
-    String fileName = String.format("%03d_%s", q + 1, Utils
-                            .fromCharToString(symbol.getChar()));
+    // Ініціалізація вихідного файлу
+    char c = symbol.getChar();
+    String fileName = "%03d_%02X_%s_%d_%d".formatted(q + 1, (int) c,
+                                                     Utils.fromCharToString(c),
+                                                     symbol.getOffsetX(),
+                                                     symbol.getFullWidth());
     File output = new File(outputFile.getAbsolutePath() + separator +
-                                                          fileName + ".bin");
-    try (var fos = new FileOutputStream(output))
-        { fos.write(symbol.getData()); } }
+                                                          fileName + ".bmp");
+    // Запис зображення у файл
+    ImageIO.write(image, "bmp", output); }
 
 // Файл для запису заголовку шрифта
 var header = new File(outputFile.getAbsolutePath() + separator + "header.bin");
