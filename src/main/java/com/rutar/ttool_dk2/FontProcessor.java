@@ -99,11 +99,10 @@ for (int q = 0; q < indexes.size(); q++) {
     image = symbol.getImage();
     
     // Ініціалізація вихідного файлу
-    char c = symbol.getChar();
-    String fileName = "%03d_%02X_%s_%d_%d".formatted(q + 1, (int) c,
-                                                     Utils.fromCharToString(c),
-                                                     symbol.getOffsetX(),
-                                                     symbol.getFullWidth());
+    String fileName = "%03d_%04X_%s_%d_%d"
+                     .formatted(q + 1, symbol.getSymbolCode(),
+                                Utils.fromCharToString(symbol.getChar()),
+                                symbol.getOffsetX(), symbol.getFullWidth());
     File output = new File(outputFile.getAbsolutePath() + separator +
                                                           fileName + ".bmp");
     // Запис зображення у файл
@@ -122,9 +121,8 @@ showMessageDialog(window, "Шрифт успішно розпаковано!");
 
 // ............................................................................
 
-catch (HeadlessException | IOException e)
-    { IO.println(e.getCause());
-      showMessageDialog(window, "При розпакуванні шрифта відбулася критична "
+catch (IOException e)
+    { showMessageDialog(window, "При розпакуванні шрифта відбулася критична "
                               + "помилка", "Помилка", ERROR_MESSAGE); }
 }
 
@@ -187,10 +185,11 @@ for (int z = 0; z < allFiles.length - 1; z++) {
     bos.write(Utils.getData(buffer));
     
     // Зчитування даних символа
-    byte[] symbolBytes = Files.readAllBytes(inputFile.toPath());
+    Symbol symbol = new Symbol(inputFile);
+    byte[] symbolBytes = symbol.getData();
     index += symbolBytes.length;
     baos.write(symbolBytes);
-
+    
 }
 
 // Запис даних у файл
@@ -202,9 +201,8 @@ showMessageDialog(window, "Шрифт успішно запаковано!");
 
 // ............................................................................
 
-catch (Exception e)
-    { IO.println(e.getCause());
-      showMessageDialog(window, "При пакуванні шрифта відбулася критична "
+catch (Exception _)
+    { showMessageDialog(window, "При пакуванні шрифта відбулася критична "
                               + "помилка", "Помилка", ERROR_MESSAGE); }
 }
 
