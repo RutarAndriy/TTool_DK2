@@ -72,6 +72,12 @@ rawPack      = Utils.getFileChooser(FILES_ONLY,
 rawUnpack    = Utils.getFileChooser(FILES_ONLY,
                                     "raw", "DK2 запаковані файли");
 
+fileOpen    .setDialogTitle("Вибір файлів для редагування");
+fntCompile  .setDialogTitle("Вибір розпакованих даних для пакування");
+fntDecompile.setDialogTitle("Вибір шрифтів для розпакування");
+rawPack     .setDialogTitle("Вибір розшифрованих файлів для шифрування");
+rawUnpack   .setDialogTitle("Вибір файлів для розшифрування");
+
 // Ініціалізація закресленого шрифта
 Map<TextAttribute, Object> attr = new HashMap<>(mni_about.getFont()
                                                          .getAttributes());
