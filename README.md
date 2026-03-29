@@ -3,10 +3,10 @@
 [![License](https://img.shields.io/github/license/RutarAndriy/TTool_DK2?label=%D0%9B%D1%96%D1%86%D0%B5%D0%BD%D0%B7%D1%96%D1%8F&color=%23FF5555)](/LICENSE)
 [![GitHub Release](https://img.shields.io/github/v/release/RutarAndriy/TTool_DK2?label=%D0%A0%D0%B5%D0%BB%D1%96%D0%B7)](https://github.com/RutarAndriy/TTool_DK2/releases)
 
-TTool_DK2 - це програма для локалізації гри DK2,<br>
+TTool_DK2 - це програма для локалізації гри Dungeon Keeper 2,<br>
 головною метою створення цієї програми був переклад гри українською мовою.
 
-... "Опис можливостей програми" ...
+Програма дозволяє редагувати ігрові файли локалізації (\*.str), а також розпаковувати та запаковувати назад ігрові шрифти (*.bf4)
 
 <!-- Готовий переклад можна завантажити [тут](https://discord.com/channels/1263174645335589006) -->
 

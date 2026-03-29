@@ -33,8 +33,8 @@ private File outputFile;                                       // вихідни
 private final JFileChooser fileOpen;           // відкривання/збереження файлів
 private final JFileChooser fntCompile;                  // компілювання шрифтів
 private final JFileChooser fntDecompile;              // декомпілювання шрифтів
-private final JFileChooser rawUnpack;                    // розпакування файлів
-private final JFileChooser rawPack;                       // запакування файлів
+// private final JFileChooser rawUnpack;                 // розпакування файлів
+// private final JFileChooser rawPack;                    // запакування файлів
 
 private File tmpFile;                                       // допоміжна змінна
 private String appDescription;                                 // опис програми
@@ -67,16 +67,16 @@ fntCompile   = Utils.getFileChooser(DIRECTORIES_ONLY,
                                     "bf4", "DK2 файли шрифтів");
 fntDecompile = Utils.getFileChooser(FILES_ONLY,
                                     "bf4", "DK2 файли шрифтів");
-rawPack      = Utils.getFileChooser(FILES_ONLY,
-                                    "bmp", "DK2 розпаковані файли");
-rawUnpack    = Utils.getFileChooser(FILES_ONLY,
-                                    "raw", "DK2 запаковані файли");
+// rawPack      = Utils.getFileChooser(FILES_ONLY,
+//                                     "bmp", "DK2 розпаковані файли");
+// rawUnpack    = Utils.getFileChooser(FILES_ONLY,
+//                                     "raw", "DK2 запаковані файли");
 
 fileOpen    .setDialogTitle("Вибір файлів для редагування");
 fntCompile  .setDialogTitle("Вибір розпакованих даних для пакування");
 fntDecompile.setDialogTitle("Вибір шрифтів для розпакування");
-rawPack     .setDialogTitle("Вибір розшифрованих файлів для шифрування");
-rawUnpack   .setDialogTitle("Вибір файлів для розшифрування");
+// rawPack     .setDialogTitle("Вибір розшифрованих файлів для шифрування");
+// rawUnpack   .setDialogTitle("Вибір файлів для розшифрування");
 
 // Ініціалізація закресленого шрифта
 Map<TextAttribute, Object> attr = new HashMap<>(mni_about.getFont()
@@ -320,11 +320,11 @@ private void showCompileFontDialog() {
 
 private void showUnpackRawDialog() {
 
-    int result = rawUnpack.showOpenDialog(this);
-    if (result != JFileChooser.APPROVE_OPTION) { return; }
+//    int result = rawUnpack.showOpenDialog(this);
+//    if (result != JFileChooser.APPROVE_OPTION) { return; }
 
-    inputFile = rawUnpack.getSelectedFile();
-    new RawProcessor(this).unpack(inputFile);
+//    inputFile = rawUnpack.getSelectedFile();
+//    new RawProcessor(this).unpack(inputFile);
 
 }
 
@@ -333,14 +333,14 @@ private void showUnpackRawDialog() {
 
 private void showPackRawDialog() {
 
-    tmpFile = Utils.getLastDir(rawUnpack);
-    if (tmpFile != null) { rawPack.setCurrentDirectory(tmpFile); }
+//    tmpFile = Utils.getLastDir(rawUnpack);
+//    if (tmpFile != null) { rawPack.setCurrentDirectory(tmpFile); }
 
-    int result = rawPack.showOpenDialog(this);
-    if (result != JFileChooser.APPROVE_OPTION) { return; }
+//    int result = rawPack.showOpenDialog(this);
+//    if (result != JFileChooser.APPROVE_OPTION) { return; }
 
-    inputFile = rawPack.getSelectedFile();
-    new RawProcessor(this).pack(inputFile);
+//    inputFile = rawPack.getSelectedFile();
+//    new RawProcessor(this).pack(inputFile);
 
 }
 
@@ -364,10 +364,7 @@ tbl_main.setModel(tableModel);
 
 switch (fileExt) {
     case "str" -> { tableModel.addColumn("№");
-                    tableModel.addColumn("Текст для перекладу"); }
-    case "dat" -> { tableModel.addColumn("№");
-                    tableModel.addColumn("Символ");
-                    tableModel.addColumn("Пробіл після символу"); } } }
+                    tableModel.addColumn("Текст для перекладу"); } } }
 
 // ============================================================================
 /// Завершальна ініціалізація нової таблиці
@@ -378,8 +375,7 @@ CellRender centerRender = new CellRender();
 centerRender.setHorizontalAlignment(SwingConstants.CENTER);
 
 switch (fileExt)
-    { case "str" -> { setColumnParams(centerRender, 45, 175); }
-      case "dat" -> { setColumnParams(centerRender, 50, 250, 250); } }
+    { case "str" -> { setColumnParams(centerRender, 45, 175); } }
 
 updateTableInfo();
 
@@ -533,10 +529,15 @@ private void initAppIcons() {
         mni_fntDecompile = new JMenuItem();
         mni_fntCompile = new JMenuItem();
         sep_three = new JPopupMenu.Separator();
+        sep_three.setVisible(false);
         mni_rawUnpack = new JMenuItem();
+        mni_rawUnpack.setVisible(false);
         mni_rawPack = new JMenuItem();
+        mni_rawPack.setVisible(false);
         sep_four = new JPopupMenu.Separator();
+        sep_four.setVisible(false);
         mni_extProcessing = new JMenuItem();
+        mni_extProcessing.setVisible(false);
         mn_info = new JMenu();
         mni_about = new JMenuItem();
 

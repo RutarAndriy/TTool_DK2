@@ -1,7 +1,6 @@
 package com.rutar.ttool_dk2;
 
 import java.io.*;
-import java.awt.*;
 import java.nio.*;
 import java.util.*;
 import javax.swing.*;
