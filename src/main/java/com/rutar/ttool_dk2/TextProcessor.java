@@ -123,6 +123,7 @@ main.write(allBytes, 0, HEADER_SIZE);
 // Запис інформації про зміщення блоків
 for (int z = 0; z < table.getRowCount(); z++)
     { tmp = (String) table.getValueAt(z, 1);
+      tmp = Utils.replaceUnusedChars(tmp);
       encryptedData = encryptString(tmp);
       data.write(encryptedData);
       intBuffer.clear().putInt(index);

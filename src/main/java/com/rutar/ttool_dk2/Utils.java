@@ -161,6 +161,17 @@ public static void printAsHex (byte[] array)
             if ((q+1) % 8  == 0) { IO.print(" "); }
             if ((q+1) % 16 == 0) { IO.println();  } } IO.println(); }
 
+// ============================================================================
+/// Заміна невикористовуваних символів у тексті
+/// @param value текст із невикористовуваними символами
+/// @return текст із заміненими символами
+
+public static String replaceUnusedChars (String value) {
+    
+    return value.replace('‘', '\'')
+                .replace('’', '\'');
+}
+
 // Кінець класу Utils =========================================================
 
 }
