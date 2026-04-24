@@ -20,7 +20,7 @@ public class RawProcessor {
 private int w;                                             // ширина зображення
 private int h;                                             // висота зображення
 private int color;                                 // колір конкретного пікселя
-private byte[] data;                                             // дані шрифта
+private byte[] data;                                         // дані зображення
 private File inputFile;                                   // вхідний файл/папка
 private File outputFile;                                 // вихідний файл/папка
 private BufferedImage image;                           // зображення для запису
@@ -68,9 +68,9 @@ showMessageDialog(window, "Файл успішно розпаковано!");
 // ............................................................................
 
 catch (HeadlessException | IOException e)
-    { IO.println(e.getCause());
-      showMessageDialog(window, "При розпакуванні файлу відбулася критична "
-                              + "помилка", "Помилка", ERROR_MESSAGE); }
+  { IO.println(e.getCause());
+    showMessageDialog(window, "При розпакуванні файлу відбулася критична "
+                            + "помилка", "Помилка", ERROR_MESSAGE); }
 }
 
 // ============================================================================
@@ -93,11 +93,11 @@ image = ImageIO.read(inputFile);
 
 // Перевірка формату прочитаного зображення
 if (image.getType() != imageType)
-    { String imageName = inputFile.getName();
-      String msg = "Файл %s має неправильний формат!%n"
-                 + "Повинен бути 24-бітний BMP";
-      showMessageDialog(window, msg.formatted(imageName), "Помилка", 0);
-      return; }
+  { String imageName = inputFile.getName();
+    String msg = "Файл %s має неправильний формат!%n"
+               + "Повинен бути 24-бітний BMP";
+    showMessageDialog(window, msg.formatted(imageName), "Помилка", 0);
+    return; }
 
 // Отримання розмірів зображення
 w = image.getWidth();
@@ -110,8 +110,8 @@ buffer.order(ByteOrder.LITTLE_ENDIAN);
 // Перетворюємо кольори пікселів у формат rgb565
 for (int y = 0; y < h; y++) {
 for (int x = 0; x < w; x++) {
-    color = image.getRGB(x, y);
-    buffer.putInt(color);
+  color = image.getRGB(x, y);
+  buffer.putInt(color);
 }
 }
 
@@ -125,9 +125,9 @@ showMessageDialog(window, "Файл успішно запаковано!");
 // ............................................................................
 
 catch (Exception e)
-    { IO.println(e.getCause());
-      showMessageDialog(window, "При пакуванні файлу відбулася критична "
-                              + "помилка", "Помилка", ERROR_MESSAGE); }
+  { IO.println(e.getCause());
+    showMessageDialog(window, "При пакуванні файлу відбулася критична "
+                            + "помилка", "Помилка", ERROR_MESSAGE); }
 }
 
 // Кінець класу RawProcessor ==================================================

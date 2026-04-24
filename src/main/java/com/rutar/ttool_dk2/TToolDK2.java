@@ -106,13 +106,15 @@ public static void main (String args[]) {
     FlatLaf.registerCustomDefaultsSource("com.rutar.ttool_dk2.themes");
 
     try { FlatMacDarkLaf.setup(); }
-    catch (Exception e) {}
+    catch (Exception _) {}
     
     // ........................................................................
     
-    EventQueue.invokeLater(() -> {
-        new TToolDK2().setVisible(true);
-    });
+    SwingUtilities.invokeLater(() ->
+      { var window = new TToolDK2();
+        window.setVisible(true);
+        SwingUtilities.invokeLater(() ->
+          { window.setMinimumSize(window.getSize()); }); });
 }
 
 // ============================================================================
@@ -124,9 +126,9 @@ private void showOpenDialog() {
 if (dataWasChanged) { 
 
 String saveDataQuestion = """
-    У відкритому файлі присутні зміни. При відкриванні
-    нового файлу вони будуть втрачені. Бажаєте продовжити?
-    """;
+  У відкритому файлі присутні зміни. При відкриванні
+  нового файлу вони будуть втрачені. Бажаєте продовжити?
+  """;
 
 int answer = showConfirmDialog(this, saveDataQuestion,
                               "Повідомлення", YES_NO_OPTION);
@@ -166,12 +168,13 @@ try { new TextProcessor().read(inputFile, tbl_main);
 // ............................................................................
 
 catch (Exception e)
-    { String msg;
-      if (e.getMessage().contains("MBToUni.dat"))
-           { msg = "Відсутній файл MBToUni.dat, подальша обробка неможлива"; }
-      else { msg = "При обробленні файлу відбулася критична помилка"; }
-      tbl_main.setModel(new DefaultTableModel());
-      showMessageDialog(this, msg, "Помилка", ERROR_MESSAGE); }
+  { String msg;
+    if (e.getMessage().contains("MBToUni.dat"))
+         { msg = "Відсутній файл MBToUni.dat, подальша обробка неможлива"; }
+    else { msg = "При обробленні файлу відбулася критична помилка"; }
+    tbl_main.setModel(new DefaultTableModel());
+    showMessageDialog(this, msg, "Помилка", ERROR_MESSAGE); }
+
 }
 
 // ============================================================================
@@ -208,8 +211,9 @@ showMessageDialog(this, "Файл " + outputFile.getName() + " успішно з
 // ............................................................................
 
 catch (Exception _)
-    { showMessageDialog(this, "При збереженні файлу відбулася критична "
-                            + "помилка", "Помилка", ERROR_MESSAGE); }
+  { showMessageDialog(this, "При збереженні файлу відбулася критична "
+                          + "помилка", "Помилка", ERROR_MESSAGE); }
+
 }
 
 // ============================================================================
@@ -250,10 +254,10 @@ pane.setEditable(false);
 pane.setFocusable(false);
 
 pane.addHyperlinkListener((HyperlinkEvent e) -> {
-    if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
-        try { Desktop.getDesktop().browse(e.getURL().toURI()); }
-        catch (IOException | URISyntaxException _) { }
-    }
+  if (e.getEventType().equals(HyperlinkEvent.EventType.ACTIVATED)) {
+    try { Desktop.getDesktop().browse(e.getURL().toURI()); }
+    catch (IOException | URISyntaxException _) { }
+  }
 });
 
 showMessageDialog(this, pane, "Про програму", INFORMATION_MESSAGE);
@@ -264,7 +268,7 @@ showMessageDialog(this, pane, "Про програму", INFORMATION_MESSAGE);
 /// Відображення вікна пошуку інформації
 
 private void showSearchDialog()
-    { new SearchDialog(this).setVisible(true); }
+  { new SearchDialog(this).setVisible(true); }
 
 // ============================================================================
 /// Відображення вікна підтвердження виходу
@@ -275,9 +279,9 @@ private void showExitDialog() {
 if (!dataWasChanged) { System.exit(0); }
 
 String saveDataQuestion = """
-    Ви бажаєте вийти з програми?
-    Усі незбережені дані буде втрачено
-    """;
+  Ви бажаєте вийти з програми?
+  Усі незбережені дані буде втрачено
+  """;
 
 int answer = showConfirmDialog(this, saveDataQuestion,
                               "Підтвердження виходу", YES_NO_OPTION);
@@ -296,7 +300,6 @@ private void showDecompileFontDialog() {
 
     inputFile = fntDecompile.getSelectedFile();
     new FontProcessor(this).decompile(inputFile);
-
 }
 
 // ============================================================================
@@ -312,7 +315,6 @@ private void showCompileFontDialog() {
 
     inputFile = fntCompile.getSelectedFile();
     new FontProcessor(this).compile(inputFile);
-
 }
 
 // ============================================================================
@@ -363,8 +365,10 @@ tableModel = new DefaultTableModel() {
 tbl_main.setModel(tableModel);
 
 switch (fileExt) {
-    case "str" -> { tableModel.addColumn("№");
-                    tableModel.addColumn("Текст для перекладу"); } } }
+  case "str" -> { tableModel.addColumn("№");
+                  tableModel.addColumn("Текст для перекладу"); } }
+
+}
 
 // ============================================================================
 /// Завершальна ініціалізація нової таблиці
@@ -375,17 +379,16 @@ CellRender centerRender = new CellRender();
 centerRender.setHorizontalAlignment(SwingConstants.CENTER);
 
 switch (fileExt)
-    { case "str" -> { setColumnParams(centerRender, 45, 175); } }
+  { case "str" -> { setColumnParams(centerRender, 45, 175); } }
 
 updateTableInfo();
 
 // ............................................................................
 
 mni_find.setEnabled(true);
-tableModel.addTableModelListener((TableModelEvent evt) -> {
-    updateTableData(evt);
-    updateAppTitle();
-});
+tableModel.addTableModelListener((TableModelEvent evt) ->
+  { updateTableData(evt);
+    updateAppTitle(); });
 
 }
 
@@ -398,14 +401,14 @@ boolean newRender, isResizable;
 
 for (int z = 0; z < columnSizes.length; z++) {
 
-    switch (fileExt)
-        { case "str" -> { newRender = z > 0; isResizable = z > 0; }
-          default    -> { newRender = z > 1; isResizable = z > 1; } }
-    
-    tColumn = tbl_main.getColumnModel().getColumn(z);
-    tColumn.setCellRenderer(!newRender ? render : new CellRender());
-    tColumn.setPreferredWidth(columnSizes[z]);
-    tColumn.setResizable(isResizable);
+  switch (fileExt)
+    { case "str" -> { newRender = z > 0; isResizable = z > 0; }
+      default    -> { newRender = z > 1; isResizable = z > 1; } }
+
+  tColumn = tbl_main.getColumnModel().getColumn(z);
+  tColumn.setCellRenderer(!newRender ? render : new CellRender());
+  tColumn.setPreferredWidth(columnSizes[z]);
+  tColumn.setResizable(isResizable);
 
 }
 
@@ -413,17 +416,17 @@ for (int z = 0; z < columnSizes.length; z++) {
 
 SwingUtilities.invokeLater(() -> {
 
-    int totalW = 0;
-    var cModel = tbl_main.getColumnModel();
-    int viewportW = sp_table.getViewport().getWidth();
-    
-    for (int q = 0; q < tbl_main.getColumnCount(); q++)
-        { totalW += cModel.getColumn(q).getPreferredWidth(); }
-    
-    if (totalW < viewportW)
-        { var lastColumn = cModel.getColumn(tbl_main.getColumnCount() - 1);
-          int prefW = viewportW - totalW + lastColumn.getPreferredWidth();
-          lastColumn.setPreferredWidth(prefW); } });
+  int totalW = 0;
+  var cModel = tbl_main.getColumnModel();
+  int viewportW = sp_table.getViewport().getWidth();
+
+  for (int q = 0; q < tbl_main.getColumnCount(); q++)
+    { totalW += cModel.getColumn(q).getPreferredWidth(); }
+
+  if (totalW < viewportW)
+    { var lastColumn = cModel.getColumn(tbl_main.getColumnCount() - 1);
+      int prefW = viewportW - totalW + lastColumn.getPreferredWidth();
+      lastColumn.setPreferredWidth(prefW); } });
 
 }
 
@@ -448,7 +451,6 @@ private void updateTableData (TableModelEvent e) {
     tbl_main.setValueAt("✓",                     rowId, 0);
     tbl_main.setValueAt("S = " + value.length(), rowId, 1);
     reactOnChange = true;
-
 }
 
 // ============================================================================
@@ -467,7 +469,6 @@ private void updateTableInfo() {
     tmp = tmp.substring(0, tmp.indexOf(":") + 1) + " "
                       + tableModel.getColumnCount();
     lbl_colCount.setText(tmp);
-    
 }
 
 // ============================================================================
@@ -500,7 +501,6 @@ private void initAppIcons() {
     setIconImages(appIcons); }
     
     catch (IOException _) { }
-    
 }
 
 // ============================================================================
@@ -509,216 +509,216 @@ private void initAppIcons() {
 /// перезапишеться редактором форм
 
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+  private void initComponents() {
 
-        sp_table = new JScrollPane();
-        tbl_main = new JTable();
-        pnl_footer = new JPanel();
-        lbl_colCount = new JLabel();
-        lbl_rowCount = new JLabel();
-        mnb_main = new JMenuBar();
-        mn_file = new JMenu();
-        mni_open = new JMenuItem();
-        mni_save = new JMenuItem();
-        sep_one = new JPopupMenu.Separator();
-        mni_find = new JMenuItem();
-        sep_two = new JPopupMenu.Separator();
-        mni_exit = new JMenuItem();
-        mn_edit = new JMenu();
-        mni_fntDecompile = new JMenuItem();
-        mni_fntCompile = new JMenuItem();
-        sep_three = new JPopupMenu.Separator();
-        sep_three.setVisible(false);
-        mni_rawUnpack = new JMenuItem();
-        mni_rawUnpack.setVisible(false);
-        mni_rawPack = new JMenuItem();
-        mni_rawPack.setVisible(false);
-        sep_four = new JPopupMenu.Separator();
-        sep_four.setVisible(false);
-        mni_extProcessing = new JMenuItem();
-        mni_extProcessing.setVisible(false);
-        mn_info = new JMenu();
-        mni_about = new JMenuItem();
+    sp_table = new JScrollPane();
+    tbl_main = new JTable();
+    pnl_footer = new JPanel();
+    lbl_colCount = new JLabel();
+    lbl_rowCount = new JLabel();
+    mnb_main = new JMenuBar();
+    mn_file = new JMenu();
+    mni_open = new JMenuItem();
+    mni_save = new JMenuItem();
+    sep_one = new JPopupMenu.Separator();
+    mni_find = new JMenuItem();
+    sep_two = new JPopupMenu.Separator();
+    mni_exit = new JMenuItem();
+    mn_edit = new JMenu();
+    mni_fntDecompile = new JMenuItem();
+    mni_fntCompile = new JMenuItem();
+    sep_three = new JPopupMenu.Separator();
+    sep_three.setVisible(false);
+    mni_rawUnpack = new JMenuItem();
+    mni_rawUnpack.setVisible(false);
+    mni_rawPack = new JMenuItem();
+    mni_rawPack.setVisible(false);
+    sep_four = new JPopupMenu.Separator();
+    sep_four.setVisible(false);
+    mni_extProcessing = new JMenuItem();
+    mni_extProcessing.setVisible(false);
+    mn_info = new JMenu();
+    mni_about = new JMenuItem();
 
-        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        setTitle("TTool_DK2");
-        addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent evt) {
-                onWindowClose(evt);
-            }
-        });
+    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    setTitle("TTool_DK2");
+    addWindowListener(new WindowAdapter() {
+      public void windowClosing(WindowEvent evt) {
+        onWindowClose(evt);
+      }
+    });
 
-        tbl_main.setModel(new DefaultTableModel(
-            new Object [][] {
+    tbl_main.setModel(new DefaultTableModel(
+      new Object [][] {
 
-            },
-            new String [] {
+      },
+      new String [] {
 
-            }
-        ));
-        tbl_main.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        tbl_main.setAutoscrolls(false);
-        tbl_main.setIntercellSpacing(new Dimension(2, 2));
-        tbl_main.setRowSelectionAllowed(false);
-        tbl_main.setShowGrid(true);
-        tbl_main.getTableHeader().setReorderingAllowed(false);
-        tbl_main.addMouseListener(new MouseAdapter() {
-            public void mouseClicked(MouseEvent evt) {
-                onTableClick(evt);
-            }
-        });
-        sp_table.setViewportView(tbl_main);
+      }
+    ));
+    tbl_main.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+    tbl_main.setAutoscrolls(false);
+    tbl_main.setIntercellSpacing(new Dimension(2, 2));
+    tbl_main.setRowSelectionAllowed(false);
+    tbl_main.setShowGrid(true);
+    tbl_main.getTableHeader().setReorderingAllowed(false);
+    tbl_main.addMouseListener(new MouseAdapter() {
+      public void mouseClicked(MouseEvent evt) {
+        onTableClick(evt);
+      }
+    });
+    sp_table.setViewportView(tbl_main);
 
-        pnl_footer.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 5));
+    pnl_footer.setLayout(new FlowLayout(FlowLayout.CENTER, 50, 5));
 
-        lbl_colCount.setText("Кількість стовбців: 0");
-        pnl_footer.add(lbl_colCount);
+    lbl_colCount.setText("Кількість стовбців: 0");
+    pnl_footer.add(lbl_colCount);
 
-        lbl_rowCount.setText("Кількість рядків: 0");
-        pnl_footer.add(lbl_rowCount);
+    lbl_rowCount.setText("Кількість рядків: 0");
+    pnl_footer.add(lbl_rowCount);
 
-        mn_file.setText("Файл");
+    mn_file.setText("Файл");
 
-        mni_open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
-        mni_open.setText("Відкрити");
-        mni_open.setActionCommand("open");
-        mni_open.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                onMenuClick(evt);
-            }
-        });
-        mn_file.add(mni_open);
+    mni_open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
+    mni_open.setText("Відкрити");
+    mni_open.setActionCommand("open");
+    mni_open.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        onMenuClick(evt);
+      }
+    });
+    mn_file.add(mni_open);
 
-        mni_save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
-        mni_save.setText("Зберегти");
-        mni_save.setActionCommand("save");
-        mni_save.setEnabled(false);
-        mni_save.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                onMenuClick(evt);
-            }
-        });
-        mn_file.add(mni_save);
-        mn_file.add(sep_one);
+    mni_save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK));
+    mni_save.setText("Зберегти");
+    mni_save.setActionCommand("save");
+    mni_save.setEnabled(false);
+    mni_save.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        onMenuClick(evt);
+      }
+    });
+    mn_file.add(mni_save);
+    mn_file.add(sep_one);
 
-        mni_find.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK));
-        mni_find.setText("Пошук");
-        mni_find.setActionCommand("find");
-        mni_find.setEnabled(false);
-        mni_find.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                onMenuClick(evt);
-            }
-        });
-        mn_file.add(mni_find);
-        mn_file.add(sep_two);
+    mni_find.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK));
+    mni_find.setText("Пошук");
+    mni_find.setActionCommand("find");
+    mni_find.setEnabled(false);
+    mni_find.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        onMenuClick(evt);
+      }
+    });
+    mn_file.add(mni_find);
+    mn_file.add(sep_two);
 
-        mni_exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
-        mni_exit.setText("Вихід");
-        mni_exit.setActionCommand("exit");
-        mni_exit.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                onMenuClick(evt);
-            }
-        });
-        mn_file.add(mni_exit);
+    mni_exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
+    mni_exit.setText("Вихід");
+    mni_exit.setActionCommand("exit");
+    mni_exit.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        onMenuClick(evt);
+      }
+    });
+    mn_file.add(mni_exit);
 
-        mnb_main.add(mn_file);
+    mnb_main.add(mn_file);
 
-        mn_edit.setText("Правка");
+    mn_edit.setText("Правка");
 
-        mni_fntDecompile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK));
-        mni_fntDecompile.setText("Розпакувати шрифт");
-        mni_fntDecompile.setActionCommand("decompileFont");
-        mni_fntDecompile.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                onMenuClick(evt);
-            }
-        });
-        mn_edit.add(mni_fntDecompile);
+    mni_fntDecompile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK));
+    mni_fntDecompile.setText("Розпакувати шрифт");
+    mni_fntDecompile.setActionCommand("decompileFont");
+    mni_fntDecompile.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        onMenuClick(evt);
+      }
+    });
+    mn_edit.add(mni_fntDecompile);
 
-        mni_fntCompile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
-        mni_fntCompile.setText("Запакувати шрифт");
-        mni_fntCompile.setActionCommand("compileFont");
-        mni_fntCompile.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                onMenuClick(evt);
-            }
-        });
-        mn_edit.add(mni_fntCompile);
-        mn_edit.add(sep_three);
+    mni_fntCompile.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK));
+    mni_fntCompile.setText("Запакувати шрифт");
+    mni_fntCompile.setActionCommand("compileFont");
+    mni_fntCompile.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        onMenuClick(evt);
+      }
+    });
+    mn_edit.add(mni_fntCompile);
+    mn_edit.add(sep_three);
 
-        mni_rawUnpack.setText("Розпакувати файли");
-        mni_rawUnpack.setActionCommand("unpackRaw");
-        mni_rawUnpack.setEnabled(false);
-        mni_rawUnpack.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                onMenuClick(evt);
-            }
-        });
-        mn_edit.add(mni_rawUnpack);
+    mni_rawUnpack.setText("Розпакувати файли");
+    mni_rawUnpack.setActionCommand("unpackRaw");
+    mni_rawUnpack.setEnabled(false);
+    mni_rawUnpack.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        onMenuClick(evt);
+      }
+    });
+    mn_edit.add(mni_rawUnpack);
 
-        mni_rawPack.setText("Запакувати файли");
-        mni_rawPack.setActionCommand("packRaw");
-        mni_rawPack.setEnabled(false);
-        mni_rawPack.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                onMenuClick(evt);
-            }
-        });
-        mn_edit.add(mni_rawPack);
-        mn_edit.add(sep_four);
+    mni_rawPack.setText("Запакувати файли");
+    mni_rawPack.setActionCommand("packRaw");
+    mni_rawPack.setEnabled(false);
+    mni_rawPack.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        onMenuClick(evt);
+      }
+    });
+    mn_edit.add(mni_rawPack);
+    mn_edit.add(sep_four);
 
-        mni_extProcessing.setText("Розширена обробка");
-        mni_extProcessing.setActionCommand("procExtended");
-        mni_extProcessing.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                onMenuClick(evt);
-            }
-        });
-        mn_edit.add(mni_extProcessing);
+    mni_extProcessing.setText("Розширена обробка");
+    mni_extProcessing.setActionCommand("procExtended");
+    mni_extProcessing.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        onMenuClick(evt);
+      }
+    });
+    mn_edit.add(mni_extProcessing);
 
-        mnb_main.add(mn_edit);
+    mnb_main.add(mn_edit);
 
-        mn_info.setText("Інфо");
+    mn_info.setText("Інфо");
 
-        mni_about.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK));
-        mni_about.setText("Про програму");
-        mni_about.setActionCommand("info");
-        mni_about.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                onMenuClick(evt);
-            }
-        });
-        mn_info.add(mni_about);
+    mni_about.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, InputEvent.CTRL_DOWN_MASK));
+    mni_about.setText("Про програму");
+    mni_about.setActionCommand("info");
+    mni_about.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
+        onMenuClick(evt);
+      }
+    });
+    mn_info.add(mni_about);
 
-        mnb_main.add(mn_info);
+    mnb_main.add(mn_info);
 
-        setJMenuBar(mnb_main);
+    setJMenuBar(mnb_main);
 
-        GroupLayout layout = new GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                    .addComponent(sp_table, GroupLayout.DEFAULT_SIZE, 588, Short.MAX_VALUE)
-                    .addComponent(pnl_footer, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
-        layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(sp_table, GroupLayout.DEFAULT_SIZE, 333, Short.MAX_VALUE)
-                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(pnl_footer, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
-        );
+    GroupLayout layout = new GroupLayout(getContentPane());
+    getContentPane().setLayout(layout);
+    layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+      .addGroup(layout.createSequentialGroup()
+        .addContainerGap()
+        .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+          .addComponent(sp_table, GroupLayout.DEFAULT_SIZE, 588, Short.MAX_VALUE)
+          .addComponent(pnl_footer, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        .addContainerGap())
+    );
+    layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+      .addGroup(layout.createSequentialGroup()
+        .addContainerGap()
+        .addComponent(sp_table, GroupLayout.DEFAULT_SIZE, 333, Short.MAX_VALUE)
+        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(pnl_footer, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+        .addContainerGap())
+    );
 
-        pack();
-        setLocationRelativeTo(null);
-    }// </editor-fold>//GEN-END:initComponents
+    pack();
+    setLocationRelativeTo(null);
+  }// </editor-fold>//GEN-END:initComponents
 
 // ============================================================================
 /// Прослуховування пунктів меню програми
@@ -758,51 +758,50 @@ private boolean isMenuSelected (JMenuItem item, boolean flip) {
     if (flip) { item.setFont(isSelected ? strikeFont : null); }
     
     return flip ? !isSelected : isSelected;
-
 }
 
 // ============================================================================
 /// Прослуховування закривання вікна
 
     private void onWindowClose(WindowEvent evt) {//GEN-FIRST:event_onWindowClose
-        showExitDialog();
+    showExitDialog();
     }//GEN-LAST:event_onWindowClose
 
 // ============================================================================
 /// Прослуховування натискань у таблиці
 
     private void onTableClick(MouseEvent evt) {                              
-        // IO.println("Clicked");
+    // IO.println("Clicked");
     }                                                   
 
 // ============================================================================
 /// Список усіх об'явлених змінних
 
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private JLabel lbl_colCount;
-    private JLabel lbl_rowCount;
-    private JMenu mn_edit;
-    private JMenu mn_file;
-    private JMenu mn_info;
-    private JMenuBar mnb_main;
-    private JMenuItem mni_about;
-    private JMenuItem mni_exit;
-    private JMenuItem mni_extProcessing;
-    private JMenuItem mni_find;
-    private JMenuItem mni_fntCompile;
-    private JMenuItem mni_fntDecompile;
-    private JMenuItem mni_open;
-    private JMenuItem mni_rawPack;
-    private JMenuItem mni_rawUnpack;
-    private JMenuItem mni_save;
-    private JPanel pnl_footer;
-    private JPopupMenu.Separator sep_four;
-    private JPopupMenu.Separator sep_one;
-    private JPopupMenu.Separator sep_three;
-    private JPopupMenu.Separator sep_two;
-    private JScrollPane sp_table;
-    public JTable tbl_main;
-    // End of variables declaration//GEN-END:variables
+  // Variables declaration - do not modify//GEN-BEGIN:variables
+  private JLabel lbl_colCount;
+  private JLabel lbl_rowCount;
+  private JMenu mn_edit;
+  private JMenu mn_file;
+  private JMenu mn_info;
+  private JMenuBar mnb_main;
+  private JMenuItem mni_about;
+  private JMenuItem mni_exit;
+  private JMenuItem mni_extProcessing;
+  private JMenuItem mni_find;
+  private JMenuItem mni_fntCompile;
+  private JMenuItem mni_fntDecompile;
+  private JMenuItem mni_open;
+  private JMenuItem mni_rawPack;
+  private JMenuItem mni_rawUnpack;
+  private JMenuItem mni_save;
+  private JPanel pnl_footer;
+  private JPopupMenu.Separator sep_four;
+  private JPopupMenu.Separator sep_one;
+  private JPopupMenu.Separator sep_three;
+  private JPopupMenu.Separator sep_two;
+  private JScrollPane sp_table;
+  public JTable tbl_main;
+  // End of variables declaration//GEN-END:variables
 
 // Кінець класу TToolDK2 ======================================================
 

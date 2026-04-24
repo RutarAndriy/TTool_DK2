@@ -19,7 +19,7 @@ private final ByteArrayInputStream bais;              // вхідний байт
 /// @param data вхідний масив даних
 
 public BitInputStream (byte[] data)
-    { bais = new ByteArrayInputStream(data); }
+  { bais = new ByteArrayInputStream(data); }
 
 // ============================================================================
 /// Зчитування n-кількості біт
@@ -30,17 +30,15 @@ public BitInputStream (byte[] data)
 public long readBits (int n) throws IOException {
 
     if (n < 0 || n > 64)
-        { throw new IllegalArgumentException("n must be 0..64"); }
+      { throw new IllegalArgumentException("n must be 0..64"); }
 
     while (bitCount < n) {
 
-        int nextByte = bais.read();
-        if (nextByte == -1) {
-            throw new IOException("End of stream");
-        }
+      int nextByte = bais.read();
+      if (nextByte == -1) { throw new IOException("End of stream"); }
 
-        buffer = (buffer << 8) | nextByte;
-        bitCount += 8;
+      buffer = (buffer << 8) | nextByte;
+      bitCount += 8;
     }
 
     int shift = bitCount - n;
@@ -59,7 +57,7 @@ public long readBits (int n) throws IOException {
 /// @throws IOException якщо відбулася помилка читання даних
 
 public long readOneBit() throws IOException
-    { return readBits(1); }
+  { return readBits(1); }
 
 // Кінець класу BitInputStream ================================================
 

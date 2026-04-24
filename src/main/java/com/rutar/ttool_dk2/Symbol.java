@@ -50,10 +50,10 @@ private final int imageType = BufferedImage.TYPE_3BYTE_BGR;   // тип зобр
 /// @param data необроблені дані символу
 
 public Symbol (int id, int fontHeight, byte[] data)
-    { this.id = id;
-      this.data = data;
-      this.fontHeight = fontHeight;
-      parseData(); }
+  { this.id = id;
+    this.data = data;
+    this.fontHeight = fontHeight;
+    parseData(); }
 
 // ============================================================================
 /// Конструктор для створення символу на основі файлу зображення
@@ -85,8 +85,7 @@ private void parseData() {
     symbolH    = buffer.getShort();   // висота графічних даних символу
     offsetX    = buffer.get();        // зсув графічних даних по горизонталі
     offsetY    = buffer.get();        // зсув графічних даних по вертикалі
-    fullWidth  = buffer.getShort();   // загальна ширина символу
-    
+    fullWidth  = buffer.getShort();   // загальна ширина символу 
 }
 
 // ============================================================================
@@ -105,7 +104,6 @@ public String toString() {
     
     return String.format(msg, id+1, symb, compSize, uncompSize, compType,
                               symbolW, symbolH, offsetX, offsetY, fullWidth);
-
 }
 
 // ============================================================================
@@ -129,9 +127,9 @@ public BufferedImage getImage() {
 
 // Якщо розмір від'ємний або нульовий - повертаємо зображення розміром 1x1
 if (symbolW <= 0 || symbolH <= 0)
-    { var image = new BufferedImage(1, 1, imageType);
-      image.setRGB(0, 0, 0x00ff00);
-      return image; }
+  { var image = new BufferedImage(1, 1, imageType);
+    image.setRGB(0, 0, 0x00ff00);
+    return image; }
 
 // Отримання масиву зашифрованих даних для рендерингу
 byte[] compData = Arrays.copyOfRange(data, descSize, data.length);
@@ -144,42 +142,43 @@ System.arraycopy(compData, 0, uncompData, 0, compData.length);
 
 try { // перетворення байтового масиву на зображення
 
-    // Якщо дані зашифровані - розшифровуємо їх
-    if (compType == 1) { decodeRLE4(uncompData); }    
+  // Якщо дані зашифровані - розшифровуємо їх
+  if (compType == 1) { decodeRLE4(uncompData); }    
+
+  // Ініціалазація потоків для читання бітів
+  var bais = new ByteArrayInputStream(uncompData);
+  var mciis = new MemoryCacheImageInputStream(bais);
+
+  // Оголошення масиву для збереження оброблених даних
+  byte[] imageData = new byte[uncompData.length * 2];
+
+  // Перетворення даних з 4 біт у 8 біт
+  for (int z = 0; z < imageData.length; z++)
+    { imageData[z] = (byte) mciis.readBits(4); }
     
-    // Ініціалазація потоків для читання бітів
-    var bais = new ByteArrayInputStream(uncompData);
-    var mciis = new MemoryCacheImageInputStream(bais);
+  // Створення зображення та отримання доступу до графіки
+  var image = new BufferedImage(symbolW, fontHeight, imageType);
+  var g = image.getGraphics();
+
+  // Замальовування зображення червоним кольором
+  g.setColor(Color.red);
+  g.fillRect(0, 0, image.getWidth(), image.getHeight());
     
-    // Оголошення масиву для збереження оброблених даних
-    byte[] imageData = new byte[uncompData.length * 2];
+  // Обробка пікселів зображення в циклі
+  for (int y = 0; y < symbolH; y++) {
+  for (int x = 0; x < symbolW; x++) {
+    // Отримання даних прозорості пікселя
+    int pixelData = imageData[y * symbolW + x];
+    // Перетворення отриманих даних на віддінок зеленого кольору
+    int color = new Color(0, pixelData * 16, 0).getRGB();
+    // Задання кольору для конкретного пікселя
+    image.setRGB(x, y + offsetY, color);
+  }        
+  }
     
-    // Перетворення даних з 4 біт у 8 біт
-    for (int z = 0; z < imageData.length; z++)
-        { imageData[z] = (byte) mciis.readBits(4); }
-    
-    // Створення зображення та отримання доступу до графіки
-    var image = new BufferedImage(symbolW, fontHeight, imageType);
-    var g = image.getGraphics();
-    
-    // Замальовування зображення червоним кольором
-    g.setColor(Color.red);
-    g.fillRect(0, 0, image.getWidth(), image.getHeight());
-    
-    // Обробка пікселів зображення в циклі
-    for (int y = 0; y < symbolH; y++) {
-    for (int x = 0; x < symbolW; x++) {
-        // Отримання даних прозорості пікселя
-        int pixelData = imageData[y * symbolW + x];
-        // Перетворення отриманих даних на віддінок зеленого кольору
-        int color = new Color(0, pixelData * 16, 0).getRGB();
-        // Задання кольору для конкретного пікселя
-        image.setRGB(x, y + offsetY, color);
-    }        
-    }
-    
-    // Повернення готового зображення
-    return image; }
+  // Повернення готового зображення
+  return image;
+}
 
 // Якщо відбулася помилка - повертаємо зображення розміром 1x1 
 catch (IOException _) { var image = new BufferedImage(1, 1, imageType);
@@ -209,18 +208,18 @@ private void loadFromFile (File file) throws IOException {
 
     // Розрахунок вертикального зміщення
     for (int z = 0; z < image.getHeight(); z++)
-        { rgb = image.getRGB(0, z) & 0xffffff;
-          if (rgb == 0xff0000) { verticalOffset++; }
-          else                 { break;            } }
+      { rgb = image.getRGB(0, z) & 0xffffff;
+        if (rgb == 0xff0000) { verticalOffset++; }
+        else                 { break;            } }
 
     offsetX = (byte) parseInt(params[3]);     // горизонтальне зміщення символу
     offsetY = (byte) verticalOffset;            // вертикальне зміщення символу
 
     // Розрахунок висоти символу
     for (int q = verticalOffset; q < image.getHeight(); q++)
-        { rgb = image.getRGB(0, q) & 0xffffff;
-          if (rgb != 0xff0000) { symbolHeight++; }
-          else                 { break;          } }
+      { rgb = image.getRGB(0, q) & 0xffffff;
+        if (rgb != 0xff0000) { symbolHeight++; }
+        else                 { break;          } }
 
     symbolW    = (short) image.getWidth();                    // ширина символу
     symbolH    = (short) symbolHeight;                        // висота символу
@@ -232,13 +231,14 @@ private void loadFromFile (File file) throws IOException {
     // Ініціалізуємо вихідні байтові потоки для запису даних
     var baos = new ByteArrayOutputStream();
     try (var mcios = new MemoryCacheImageOutputStream(baos))
-        { // Обробка пікселів зображення в циклі
-          for (int y = 0; y < symbolH; y++) {
-          for (int x = 0; x < symbolW; x++) {
-              // Отримання значення зеленого кольору
-              alpha = ((image.getRGB(x, y + offsetY)) >> 8 & 0xff) / 16;
-              // Запис отриманого значення у байтовий потік
-              mcios.writeBits(alpha, 4); } } }
+      { // Обробка пікселів зображення в циклі
+        for (int y = 0; y < symbolH; y++) {
+        for (int x = 0; x < symbolW; x++) {
+          // Отримання значення зеленого кольору
+          alpha = ((image.getRGB(x, y + offsetY)) >> 8 & 0xff) / 16;
+          // Запис отриманого значення у байтовий потік
+          mcios.writeBits(alpha, 4);
+        } } }
 
     // Перетворення байтового потоку в масив байт
     byte[] imageData = baos.toByteArray();
@@ -266,7 +266,6 @@ private void loadFromFile (File file) throws IOException {
     buffer.put(imageData);         // запаковані дані зображення
 
     data = buffer.array();         // переініціалізація зашифрованих даних
-
 }
 
 // ============================================================================
@@ -282,32 +281,31 @@ private void decodeRLE4 (byte[] data) throws IOException {
 
     // Розшифровування даних в циклі
     try (var mcios = new MemoryCacheImageOutputStream(baos)) {
-        // Читання даних, поки вони не закінчуться
-        while (true) {
-            // Читання половини байту
-            value = (int) iis.readBits(4);
-            // Якщо зчитано 0 - це спеціальна мітка
-            if (value == 0) {
-                // Читання половини байту - кількість повторюваних даних
-                count = (int) iis.readBits(4);
-                // Якщо кількість повторюваних даних > 0 - продовжуємо
-                if (count != 0) {
-                    // Читання половини байту - значення для повторювання
-                    value = (int) iis.readBits(4);
-                    // Записуємо повторюване значення в циклі
-                    for (int i = 0; i < count; i++)
-                        { mcios.writeBits(value, 4); } }
-                // Якщо кількість повторюваних даних = 0 - дані скінчилися
-                else { break; } }
-            // Якщо зчитано не 0 - записуємо значення у вихідний потік
-            else { mcios.writeBits(value, 4); } } }
+      // Читання даних, поки вони не закінчуться
+      while (true) {
+        // Читання половини байту
+        value = (int) iis.readBits(4);
+        // Якщо зчитано 0 - це спеціальна мітка
+        if (value == 0) {
+            // Читання половини байту - кількість повторюваних даних
+            count = (int) iis.readBits(4);
+            // Якщо кількість повторюваних даних > 0 - продовжуємо
+            if (count != 0) {
+                // Читання половини байту - значення для повторювання
+                value = (int) iis.readBits(4);
+                // Записуємо повторюване значення в циклі
+                for (int i = 0; i < count; i++)
+                    { mcios.writeBits(value, 4); } }
+            // Якщо кількість повторюваних даних = 0 - дані скінчилися
+            else { break; } }
+        // Якщо зчитано не 0 - записуємо значення у вихідний потік
+        else { mcios.writeBits(value, 4); } } }
 
     // Перетворення вихідного байтового потоку в масив байт
     var result = baos.toByteArray();
 
     // Перевизначення вхідних даних
     System.arraycopy(result, 0, data, 0, result.length);
-
 }
 
 // Кінець класу Symbol ========================================================

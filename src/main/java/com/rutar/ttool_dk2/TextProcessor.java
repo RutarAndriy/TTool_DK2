@@ -39,9 +39,9 @@ private final char oLink = '⋐';                     // символ почат
 private final char cLink = '⋑';                       // символ кінця посилання
 
 private final char[] unprintableSymbols =   // заміни для недрукованих символів
-    { '➀', '➁', '➂', '➃', '➄', '➅', '➆', '➇', '➈', '➉',
-      '➊', '➋', '➌', '➍', '➎', '➏', '➐', '➑', '➒', '➓',
-      'Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'Ⅵ', 'Ⅶ', 'Ⅷ', 'Ⅸ', 'Ⅹ', 'Ⅺ', 'Ⅻ' };
+  { '➀', '➁', '➂', '➃', '➄', '➅', '➆', '➇', '➈', '➉',
+    '➊', '➋', '➌', '➍', '➎', '➏', '➐', '➑', '➒', '➓',
+    'Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ', 'Ⅵ', 'Ⅶ', 'Ⅷ', 'Ⅸ', 'Ⅹ', 'Ⅺ', 'Ⅻ' };
 
 // ============================================================================
 /// Читання зашифрованих ігрових текстів
@@ -79,25 +79,25 @@ ArrayList<String> row = new ArrayList<>();         // масив даних ря
 
 // Зчитування всіх зміщень текстових рядків
 for (int z = 0; z < offsets.length; z++)
-    { offsets[z] = buffer.getInt();
-      if (debug) { IO.println("offset №%04d = 0x%X"
-                     .formatted(z+1, offsets[z])); } }
+  { offsets[z] = buffer.getInt();
+    if (debug) { IO.println("offset №%04d = 0x%X"
+                   .formatted(z+1, offsets[z])); } }
 
 // Зчитування всіх текстових рядків
 for (int q = 0; q < offsets.length; q++)
-    { // Визначення початку і кінця даних
-      int from = offsets[q] + HEADER_SIZE;
-      int to   = (q == offsets.length - 1) ? allBytes.length :
-                                             offsets[q+1] + HEADER_SIZE;
-      // Копіювання даних із загального масиву
-      byte[] textData = Arrays.copyOfRange(allBytes, from, to);
-      // Розшифровування текстового блоку
-      tmp = decryptString(textData);
-      // Додавання даних у таблицю
-      row.clear();
-      row.add(String.valueOf(q + 1));
-      row.add(tmp);
-      tModel.addRow(row.toArray(String[]::new)); } }
+  { // Визначення початку і кінця даних
+    int from = offsets[q] + HEADER_SIZE;
+    int to   = (q == offsets.length - 1) ? allBytes.length :
+                                           offsets[q+1] + HEADER_SIZE;
+    // Копіювання даних із загального масиву
+    byte[] textData = Arrays.copyOfRange(allBytes, from, to);
+    // Розшифровування текстового блоку
+    tmp = decryptString(textData);
+    // Додавання даних у таблицю
+    row.clear();
+    row.add(String.valueOf(q + 1));
+    row.add(tmp);
+    tModel.addRow(row.toArray(String[]::new)); } }
 
 // ============================================================================
 /// Запис зашифрованих ігрових текстів
@@ -122,20 +122,22 @@ main.write(allBytes, 0, HEADER_SIZE);
 
 // Запис інформації про зміщення блоків
 for (int z = 0; z < table.getRowCount(); z++)
-    { tmp = (String) table.getValueAt(z, 1);
-      tmp = Utils.replaceUnusedChars(tmp);
-      encryptedData = encryptString(tmp);
-      data.write(encryptedData);
-      intBuffer.clear().putInt(index);
-      main.writeBytes(intBuffer.array());
-      index += encryptedData.length; }
+  { tmp = (String) table.getValueAt(z, 1);
+    tmp = Utils.replaceUnusedChars(tmp);
+    encryptedData = encryptString(tmp);
+    data.write(encryptedData);
+    intBuffer.clear().putInt(index);
+    main.writeBytes(intBuffer.array());
+    index += encryptedData.length; }
 
 // Запис зашифрованих текстових блоків
 main.writeBytes(data.toByteArray());
 
 // Запис результату в файл
 try (FileOutputStream fos = new FileOutputStream(outputFile))
-    { fos.write(main.toByteArray()); } }
+  { fos.write(main.toByteArray()); }
+
+}
 
 // ============================================================================
 /// Ініціалізація таблиці кодування символів
@@ -163,11 +165,13 @@ codesTable = new byte[symbolsCount][2];  // ініціалізація маси�
 
 // Зчитування таблиці символів
 for (int z = 0; z < symbolsCount; z++)
-    { buffer.get(symbolBytes);
-      codesTable[z] = symbolBytes.clone();
-      symbolsTable[z] = getCharByBytes(symbolBytes);
-      if (debug) { IO.println("%03d <> 0x%1$02X <> \"%s\""
-                     .formatted(z, symbolsTable[z])); } } }
+  { buffer.get(symbolBytes);
+    codesTable[z] = symbolBytes.clone();
+    symbolsTable[z] = getCharByBytes(symbolBytes);
+    if (debug) { IO.println("%03d <> 0x%1$02X <> \"%s\""
+                   .formatted(z, symbolsTable[z])); } }
+
+}
 
 // ============================================================================
 /// Перетворення масиву байт на символ
@@ -176,34 +180,35 @@ for (int z = 0; z < symbolsCount; z++)
 
 private char getCharByBytes (byte[] bytes) {
 
-// Перетворення байту у беззнакове ціле число
-int n = Byte.toUnsignedInt(bytes[0]);
+    // Перетворення байту у беззнакове ціле число
+    int n = Byte.toUnsignedInt(bytes[0]);
 
-// Якщо символ є однобайтним - використовуємо кодування cp1251
-if (bytes[1] == 0) {
-    // Заміна недрукованих спецсимволів
-    if      (n < 32)   { return unprintableSymbols[n]; }
-    // Заміна символу м'якого переносу
-    else if (n == 173) { return '□'; }
-    // Заміна символу нерозривного пробілу
-    else if (n == 160) { return '■'; }
-    // Заміна особливого керуючого символу
-    else if (n == 152) { return '☑'; }
-    // Заміна символу видалення
-    else if (n == 127) { return '☒'; }
-    // Обробка звичайних символів
-    else { try { tmp = new String(new byte[] { bytes[0] }, "cp1251");
-                 return tmp.toCharArray()[0]; }
-           catch (UnsupportedEncodingException e) { return '※'; } } }
+    // Якщо символ є однобайтним - використовуємо кодування cp1251
+    if (bytes[1] == 0) {
+      // Заміна недрукованих спецсимволів
+      if      (n < 32)   { return unprintableSymbols[n]; }
+      // Заміна символу м'якого переносу
+      else if (n == 173) { return '□'; }
+      // Заміна символу нерозривного пробілу
+      else if (n == 160) { return '■'; }
+      // Заміна особливого керуючого символу
+      else if (n == 152) { return '☑'; }
+      // Заміна символу видалення
+      else if (n == 127) { return '☒'; }
+      // Обробка звичайних символів
+      else { try { tmp = new String(new byte[] { bytes[0] }, "cp1251");
+                   return tmp.toCharArray()[0]; }
+             catch (UnsupportedEncodingException e) { return '※'; } } }
 
-// Якщо символ є двохбайтним - заміняємо його
-else { switch (n) { case 19 -> { return '♙'; }
-                    case 24 -> { return '♘'; }
-                    case 25 -> { return '♗'; }
-                    case 28 -> { return '♖'; }
-                    case 29 -> { return '♕'; }
-                    case 38 -> { return '♔'; }
-                    default -> { return '※'; } } } }
+    // Якщо символ є двохбайтним - заміняємо його
+    else { switch (n) { case 19 -> { return '♙'; }
+                        case 24 -> { return '♘'; }
+                        case 25 -> { return '♗'; }
+                        case 28 -> { return '♖'; }
+                        case 29 -> { return '♕'; }
+                        case 38 -> { return '♔'; }
+                        default -> { return '※'; } } }
+}
 
 // ============================================================================
 /// Перетворення символу на масив байт
@@ -220,21 +225,22 @@ private byte[] getBytesByChar (char symbol) {
     
     // Обробка особливих символів
     switch (symbol)
-        { case '♙' -> { return new byte[] {         19, 32 }; }
-          case '♘' -> { return new byte[] {         24, 32 }; }
-          case '♗' -> { return new byte[] {         25, 32 }; }
-          case '♖' -> { return new byte[] {         28, 32 }; }
-          case '♕' -> { return new byte[] {         29, 32 }; }
-          case '♔' -> { return new byte[] {         38, 32 }; }
-          case '□' -> { return new byte[] { (byte) 173,  0 }; }
-          case '■' -> { return new byte[] { (byte) 160,  0 }; }
-          case '☑' -> { return new byte[] { (byte) 152,  0 }; }
-          case '☒' -> { return new byte[] { (byte) 127,  0 }; } }
+      { case '♙' -> { return new byte[] {         19, 32 }; }
+        case '♘' -> { return new byte[] {         24, 32 }; }
+        case '♗' -> { return new byte[] {         25, 32 }; }
+        case '♖' -> { return new byte[] {         28, 32 }; }
+        case '♕' -> { return new byte[] {         29, 32 }; }
+        case '♔' -> { return new byte[] {         38, 32 }; }
+        case '□' -> { return new byte[] { (byte) 173,  0 }; }
+        case '■' -> { return new byte[] { (byte) 160,  0 }; }
+        case '☑' -> { return new byte[] { (byte) 152,  0 }; }
+        case '☒' -> { return new byte[] { (byte) 127,  0 }; } }
     
     // Обробка звичайних символів
     try { byte[] bytes = Character.toString(symbol).getBytes("cp1251");
           return new byte[] { bytes[0], 0 }; }
-    catch (UnsupportedEncodingException e) { return new byte[] { 0, 0 }; } }
+    catch (UnsupportedEncodingException e) { return new byte[] { 0, 0 }; }
+}
 
 // ============================================================================
 /// Розшифрування текстового блоку
@@ -256,40 +262,40 @@ private String decryptString (byte[] data) {
     // Обробка даних у циклі
     while (position < data.length - 1) {
 
-        // Визначення типу даних
-        type = buffer.get(); position++;
+      // Визначення типу даних
+      type = buffer.get(); position++;
 
-        // Тип даних 1 - текст
-        if (type == 1) {
-            // Визначення розміру даних
-            size = buffer.getShort(); position += 2;
-            buffer.get();             position += 1;
-            // Зчитування текстових даних
-            dataPart = new byte[size];
-            buffer.get(dataPart); position += size;
-            // Посимвольна обробка тексту
-            for (byte b : dataPart)
-                { int code = Byte.toUnsignedInt(b) - 1;
-                  builder.append(symbolsTable[code]); }
-            // Розрахунок правильного розміру блоку
-            int rem = position % DATA_BLOCK_SIZE;
-            if (rem != 0) { position += (DATA_BLOCK_SIZE - rem); } }
+      // Тип даних 1 - текст
+      if (type == 1) {
+        // Визначення розміру даних
+        size = buffer.getShort(); position += 2;
+        buffer.get();             position += 1;
+        // Зчитування текстових даних
+        dataPart = new byte[size];
+        buffer.get(dataPart); position += size;
+        // Посимвольна обробка тексту
+        for (byte b : dataPart)
+            { int code = Byte.toUnsignedInt(b) - 1;
+              builder.append(symbolsTable[code]); }
+        // Розрахунок правильного розміру блоку
+        int rem = position % DATA_BLOCK_SIZE;
+        if (rem != 0) { position += (DATA_BLOCK_SIZE - rem); } }
 
-        // Тип даних 2 - посилання
-        else if (type == 2) {
-            // Отримання номеру посилання
-            link = buffer.getShort(); position += 2;
-            buffer.get();             position += 1;
-            // Обробка посилання
-            builder.append(oLink);
-            builder.append(String.valueOf(link + 1));
-            builder.append(cLink); }
+      // Тип даних 2 - посилання
+      else if (type == 2) {
+        // Отримання номеру посилання
+        link = buffer.getShort(); position += 2;
+        buffer.get();             position += 1;
+        // Обробка посилання
+        builder.append(oLink);
+        builder.append(String.valueOf(link + 1));
+        builder.append(cLink); }
 
-        // Тип даних 0 - дані закінчилися
-        else { break; }
+      // Тип даних 0 - дані закінчилися
+      else { break; }
 
-        // Оновлення позиції буферу
-        buffer.position(position);
+      // Оновлення позиції буферу
+      buffer.position(position);
     }
 
     // Повернення результату
@@ -309,50 +315,50 @@ private byte[] encryptString (String text) {
 
     // Розділення тексту на значущі частини
     for (String part : text.split(String.valueOf(oLink))) {
-        // Якщо частина порожня - пропускаємо її
-        if (part.isEmpty()) { continue; }
-        // Знаходження позиції початку посилання
-        int index = part.indexOf(cLink);
-        // Якщо позиція не знайдена - це звичайний текст
-        if (index == -1) { parts.add(part); }
-        // Якщо позиція знайдена - це посилання
-        else { // Отримання посилання
-               parts.add(oLink + part.substring(0, index));
-               // Отримання залишкового тексту
-               if (index + 1 < part.length())
-                   { parts.add(part.substring(index + 1)); } } }
+      // Якщо частина порожня - пропускаємо її
+      if (part.isEmpty()) { continue; }
+      // Знаходження позиції початку посилання
+      int index = part.indexOf(cLink);
+      // Якщо позиція не знайдена - це звичайний текст
+      if (index == -1) { parts.add(part); }
+      // Якщо позиція знайдена - це посилання
+      else { // Отримання посилання
+             parts.add(oLink + part.substring(0, index));
+             // Отримання залишкового тексту
+             if (index + 1 < part.length())
+                { parts.add(part.substring(index + 1)); } } }
 
     // Обробка частин тексту в циклі
     for (String part : parts)
-        { // Обробка посилань
-          if (part.startsWith(String.valueOf(oLink)))
-               { int link = Integer.parseInt(part.substring(1)) - 1;
-                 buffer = ByteBuffer.allocate(4).order(LITTLE_ENDIAN);
-                 buffer.put((byte) 0x2);
-                 buffer.putShort((short) link);
-                 buffer.put((byte) 0x0); }
-          // Обробка звичайного тексту
-          else { int bufferSize = 4 + part.length();
-                 int rem = bufferSize % DATA_BLOCK_SIZE;
-                 if (rem != 0) { bufferSize += (DATA_BLOCK_SIZE - rem); }
-                 buffer = ByteBuffer.allocate(bufferSize).order(LITTLE_ENDIAN);
-                 buffer.put((byte) 0x1);
-                 buffer.putShort((short) part.length());
-                 buffer.put((byte) 0x0);
-                 // Обробка символів у циклі
-                 for (char symbol : part.toCharArray())
-                     { // Перетворення символу на масив байт
-                       byte[] bytes = getBytesByChar(symbol);
-                       // Пошук коду в масиві байтових кодів
-                       int index = IntStream.range(0, codesTable.length)
-                                            .filter(i -> Arrays
-                                            .equals(codesTable[i], bytes))
-                                            .findFirst().orElse(-1) + 1;
-                       // Запис результату в буфер
-                       buffer.put((byte) index); } }
+      { // Обробка посилань
+        if (part.startsWith(String.valueOf(oLink)))
+             { int link = Integer.parseInt(part.substring(1)) - 1;
+               buffer = ByteBuffer.allocate(4).order(LITTLE_ENDIAN);
+               buffer.put((byte) 0x2);
+               buffer.putShort((short) link);
+               buffer.put((byte) 0x0); }
+        // Обробка звичайного тексту
+        else { int bufferSize = 4 + part.length();
+               int rem = bufferSize % DATA_BLOCK_SIZE;
+               if (rem != 0) { bufferSize += (DATA_BLOCK_SIZE - rem); }
+               buffer = ByteBuffer.allocate(bufferSize).order(LITTLE_ENDIAN);
+               buffer.put((byte) 0x1);
+               buffer.putShort((short) part.length());
+               buffer.put((byte) 0x0);
+               // Обробка символів у циклі
+               for (char symbol : part.toCharArray())
+                  { // Перетворення символу на масив байт
+                    byte[] bytes = getBytesByChar(symbol);
+                    // Пошук коду в масиві байтових кодів
+                    int index = IntStream.range(0, codesTable.length)
+                                         .filter(i -> Arrays
+                                         .equals(codesTable[i], bytes))
+                                         .findFirst().orElse(-1) + 1;
+                    // Запис результату в буфер
+                    buffer.put((byte) index); } }
 
-          // Запис даних у вихідний потік
-          baos.writeBytes(buffer.array()); }
+        // Запис даних у вихідний потік
+        baos.writeBytes(buffer.array()); }
     
     // Запис 4 пустих байт після завершення запису даних
     baos.writeBytes(new byte[4]);

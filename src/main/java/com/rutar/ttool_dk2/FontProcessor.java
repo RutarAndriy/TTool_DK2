@@ -77,7 +77,7 @@ short symbolsCount = buffer.getShort();
 // Отримання зміщень блоків даних
 var indexes = new ArrayList<Integer>();
 for (int z = 0; z < symbolsCount; z++)
-    { indexes.add(buffer.getInt()); }
+  { indexes.add(buffer.getInt()); }
 
 // ............................................................................
 // Обробка усіх символів у циклі
@@ -85,34 +85,35 @@ for (int z = 0; z < symbolsCount; z++)
 Symbol symbol;
 for (int q = 0; q < indexes.size(); q++) {
 
-    // Отримання даних символа
-    int to, from = indexes.get(q);
-    if (q < indexes.size() - 1) { to = indexes.get(q+1);  }
-    else                        { to = buffer.capacity(); }
-    byte[] charData = new byte[to - from];
-    buffer.get(charData);
+  // Отримання даних символа
+  int to, from = indexes.get(q);
+  if (q < indexes.size() - 1) { to = indexes.get(q+1);  }
+  else                        { to = buffer.capacity(); }
+  byte[] charData = new byte[to - from];
+  buffer.get(charData);
 
-    // Ініціалізація символа
-    symbol = new Symbol(q, maxHeight, charData);
-    if (debug) { IO.println(symbol.toString()); }
-    image = symbol.getImage();
+  // Ініціалізація символа
+  symbol = new Symbol(q, maxHeight, charData);
+  if (debug) { IO.println(symbol.toString()); }
+  image = symbol.getImage();
     
-    // Ініціалізація вихідного файлу
-    String fileName = "%03d_%04X_%s_%d_%d"
-                     .formatted(q + 1, symbol.getSymbolCode(),
-                                Utils.fromCharToString(symbol.getChar()),
-                                symbol.getOffsetX(), symbol.getFullWidth());
-    File output = new File(outputFile.getAbsolutePath() + separator +
-                                                          fileName + ".bmp");
-    // Запис зображення у файл
-    ImageIO.write(image, "bmp", output); }
+  // Ініціалізація вихідного файлу
+  String fileName = "%03d_%04X_%s_%d_%d"
+                   .formatted(q + 1, symbol.getSymbolCode(),
+                              Utils.fromCharToString(symbol.getChar()),
+                              symbol.getOffsetX(), symbol.getFullWidth());
+  File output = new File(outputFile.getAbsolutePath() + separator +
+                                                        fileName + ".bmp");
+  // Запис зображення у файл
+  ImageIO.write(image, "bmp", output);
+}
 
 // Файл для запису заголовку шрифта
 var header = new File(outputFile.getAbsolutePath() + separator + "header.bin");
 
 // Запис даних у файл
 try (var fos = new FileOutputStream(header))
-    { fos.write(baos.toByteArray()); }
+  { fos.write(baos.toByteArray()); }
 
 showMessageDialog(window, "Шрифт успішно розпаковано!");
 
@@ -121,8 +122,8 @@ showMessageDialog(window, "Шрифт успішно розпаковано!");
 // ............................................................................
 
 catch (IOException e)
-    { showMessageDialog(window, "При розпакуванні шрифта відбулася критична "
-                              + "помилка", "Помилка", ERROR_MESSAGE); }
+  { showMessageDialog(window, "При розпакуванні шрифта відбулася критична "
+                            + "помилка", "Помилка", ERROR_MESSAGE); }
 }
 
 // ============================================================================
@@ -172,23 +173,22 @@ var baos = new ByteArrayOutputStream();
 // Обробка символів у циклі
 for (int z = 0; z < allFiles.length - 1; z++) {
 
-    // Отримання назви файлу для обробки
-    String imageName = String.format("%03d", z + 1);
-    for (File f : allFiles)
-        { if (f.getName().startsWith(imageName)) { inputFile = f;
-                                                   break; } }
+  // Отримання назви файлу для обробки
+  String imageName = String.format("%03d", z + 1);
+  for (File f : allFiles)
+    { if (f.getName().startsWith(imageName)) { inputFile = f;
+                                               break; } }
     
-    // Запис інформації про поточний індекс
-    buffer.clear();
-    buffer.putInt(index);
-    bos.write(Utils.getData(buffer));
+  // Запис інформації про поточний індекс
+  buffer.clear();
+  buffer.putInt(index);
+  bos.write(Utils.getData(buffer));
     
-    // Зчитування даних символа
-    Symbol symbol = new Symbol(inputFile);
-    byte[] symbolBytes = symbol.getData();
-    index += symbolBytes.length;
-    baos.write(symbolBytes);
-    
+  // Зчитування даних символа
+  Symbol symbol = new Symbol(inputFile);
+  byte[] symbolBytes = symbol.getData();
+  index += symbolBytes.length;
+  baos.write(symbolBytes);
 }
 
 // Запис даних у файл
@@ -201,8 +201,8 @@ showMessageDialog(window, "Шрифт успішно запаковано!");
 // ............................................................................
 
 catch (Exception _)
-    { showMessageDialog(window, "При пакуванні шрифта відбулася критична "
-                              + "помилка", "Помилка", ERROR_MESSAGE); }
+  { showMessageDialog(window, "При пакуванні шрифта відбулася критична "
+                            + "помилка", "Помилка", ERROR_MESSAGE); }
 }
 
 // Кінець класу FontProcessor =================================================

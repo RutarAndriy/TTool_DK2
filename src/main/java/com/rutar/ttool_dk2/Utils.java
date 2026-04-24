@@ -24,10 +24,8 @@ public static final File HOME_DIR = FileSystemView.getFileSystemView()
 /// @param c символ
 /// @return код символу в кодуванні cp1251
 
-public static int fromCP1251CharToCode (char c) {
-    
-    return String.valueOf(c).getBytes(Charset.forName("cp1251"))[0] & 0xFF;
-}
+public static int fromCP1251CharToCode (char c)
+  { return String.valueOf(c).getBytes(Charset.forName("cp1251"))[0] & 0xFF; }
 
 // ============================================================================
 /// Отримання символу за його кодом в кодуванні cp1251
@@ -85,7 +83,6 @@ public static void selectCell (JTable table, int col, int row) {
 
     Rectangle rect = table.getCellRect(row, col, true);
     table.scrollRectToVisible(rect);
-
 }
 
 // ============================================================================
@@ -97,7 +94,7 @@ public static void selectCell (JTable table, int col, int row) {
 
 public static JFileChooser getFileChooser (int selectionMode,
                                            String ext, String desc)
-    { return getFileChooser(selectionMode, Map.of(ext, desc)); }
+  { return getFileChooser(selectionMode, Map.of(ext, desc)); }
 
 // ============================================================================
 /// Отримання налаштованого JFileChooser'а
@@ -115,11 +112,10 @@ public static JFileChooser getFileChooser (int selectionMode,
     chooser.setCurrentDirectory(HOME_DIR);
     
     filters.forEach((ext, desc) ->
-        { FileNameExtensionFilter f = new FileNameExtensionFilter(desc, ext);
-          chooser.addChoosableFileFilter(f); });
+      { FileNameExtensionFilter f = new FileNameExtensionFilter(desc, ext);
+        chooser.addChoosableFileFilter(f); });
     
     return chooser;
-
 }
 
 // ============================================================================
@@ -133,14 +129,13 @@ public static File getLastDir (JFileChooser chooser) {
     
     // Якщо останього файлу немає - повертаємо null
     if (file == null)
-        { return null; }
+      { return null; }
     // Якщо останній файл є папкою - повертаємо батьківську папку
     else if (file.isDirectory())
-        { return new File(file.getParent()); }
+      { return new File(file.getParent()); }
     // Якщо останній файл є файлом - повертаємо шлях до його папки
     else
-        { return new File(file.getPath().replace(file.getName(), "")); }
-
+      { return new File(file.getPath().replace(file.getName(), "")); }
 }
 
 // ============================================================================
@@ -149,28 +144,26 @@ public static File getLastDir (JFileChooser chooser) {
 /// @return усі записані в буфер дані
 
 public static byte[] getData (ByteBuffer buffer)
-    { return Arrays.copyOf(buffer.array(), buffer.position()); }
+  { return Arrays.copyOf(buffer.array(), buffer.position()); }
 
 // ============================================================================
 /// Виведення байтового масиву в консоль у вигляді hex-значень
 /// @param array байтовий масив для виведення в консоль
 
 public static void printAsHex (byte[] array)
-    { for (int q = 0; q < array.length; q++)
-          { IO.print("%02X ".formatted(array[q]));
-            if ((q+1) % 8  == 0) { IO.print(" "); }
-            if ((q+1) % 16 == 0) { IO.println();  } } IO.println(); }
+  { for (int q = 0; q < array.length; q++)
+      { IO.print("%02X ".formatted(array[q]));
+        if ((q+1) % 8  == 0) { IO.print(" "); }
+        if ((q+1) % 16 == 0) { IO.println();  } } IO.println(); }
 
 // ============================================================================
 /// Заміна невикористовуваних символів у тексті
 /// @param value текст із невикористовуваними символами
 /// @return текст із заміненими символами
 
-public static String replaceUnusedChars (String value) {
-    
-    return value.replace('‘', '\'')
-                .replace('’', '\'');
-}
+public static String replaceUnusedChars (String value)
+  { return value.replace('‘', '\'')
+                .replace('’', '\''); }
 
 // Кінець класу Utils =========================================================
 
